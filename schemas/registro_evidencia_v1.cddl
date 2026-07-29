@@ -1,0 +1,41 @@
+; Registro de evidencia V1 — esquema publicado (Bloque 3 / J / INV-03).
+; Una decision sin hash de paquete normativo o sin identificadores de norma
+; cuando el veredicto es ALLOW no es valida (INV-03 / H-5).
+
+registro = {
+  sujeto: tstr .size (1..256),
+  epoca: uint,
+  secuencia: uint,
+  prev_hash: bstr .size 48,
+  tipo: "decision" / "recibo",
+  payload: bstr,
+  digest: bstr .size 48,
+  firma_mldsa87: bstr
+}
+
+payload-decision = {
+  version: 1,
+  veredicto: 0..3,
+  hash_paquete: bstr .size 48,
+  normas_citadas: [* tstr],
+  pasos: uint
+}
+
+; ALLOW (veredicto=3) exige normas_citadas con longitud >= 1.
+
+payload-recibo = {
+  version: 1,
+  digest_parametros: bstr .size 48,
+  digest_resultado: bstr .size 48,
+  digest_decision: bstr .size 48
+}
+
+checkpoint = {
+  epoca: uint,
+  suelo_epoca: uint,
+  merkle_root: bstr .size 48,
+  n_registros: uint,
+  firma_autoridad_mldsa87: bstr,
+  cofirma_testigo_1_slh_dsa: bstr,
+  cofirma_testigo_2_slh_dsa: bstr
+}

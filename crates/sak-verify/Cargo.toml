@@ -1,0 +1,13 @@
+[package]
+name = "sak-verify"
+description = "Verificador independiente offline de evidencia (J.5 / INV-15)"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "sak-verify"
+path = "src/main.rs"
+
+[dependencies]
+sak-core = { path = "../sak-core" }

@@ -1,0 +1,28 @@
+# SYMBOLS.lock — Lista cerrada de símbolos públicos del Sovereign AI Kernel.
+#
+# Fuente canónica: Matriz Maestra v1.1 — INV-01 («ABI cerrada de 8 símbolos»),
+# INV-06 y E.1 (tres familias: pedir decisión, ejercer capacidad, observar).
+# Lista aprobada por el operador el 2026-07-28.
+#
+# Regla (L-01): la enumeración de símbolos exportados del binario compilado
+# debe coincidir EXACTAMENTE con esta lista. Un símbolo fuera de lista, o
+# ausente, bloquea el release. No existe símbolo público de gestión de
+# memoria: el FFI usa buffers proporcionados por el llamador o salida de
+# tamaño fijo y documentada.
+#
+# Formato: una línea por símbolo; las líneas que empiezan por «#» son
+# comentario y se ignoran en la comparación.
+
+# --- familia: pedir decisión ---
+sak_decidir
+
+# --- familia: ejercer capacidad ---
+sak_ejercer
+
+# --- familia: observar ---
+sak_estado
+sak_salud
+sak_exportar_evidencia
+sak_verificar
+sak_version
+sak_describir_abi

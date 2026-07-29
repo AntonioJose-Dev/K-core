@@ -1,0 +1,9 @@
+[package]
+name = "sak-recompute"
+description = "Proceso independiente de recomputación bit a bit del conjunto de conformidad del Bloque 1"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+sak-core = { path = "../sak-core" }

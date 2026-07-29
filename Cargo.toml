@@ -1,0 +1,23 @@
+# Sovereign AI Kernel — workspace raíz.
+# Fuente canónica: MATRIZ MAESTRA CANONICA - Sovereign AI Kernel v1.1 (K-CORE, solo lectura).
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/sak-core",
+    "crates/sak-abi",
+    "crates/sak-recompute",
+    "crates/sak-verify",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace.dependencies]
+sha2 = { version = "0.10", default-features = false }
+hmac = "0.12"
+aes-gcm = { version = "0.10", default-features = false, features = ["aes", "alloc"] }
+fips204 = { version = "0.4.6", default-features = false, features = ["ml-dsa-87", "default-rng"] }
+fips205 = { version = "0.4.1", default-features = false, features = ["slh_dsa_sha2_128s", "default-rng"] }

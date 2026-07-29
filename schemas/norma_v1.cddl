@@ -1,0 +1,64 @@
+; Norma V1 — esquema publicado (Matriz G.1).
+; Serialización determinista en el crate sak-core; este CDDL es la referencia.
+
+norma = {
+  identificador: tstr .size (1..256),
+  fuente: tstr .size (1..2048),
+  jurisdiccion: tstr .size (1..64),
+  vigencia: {
+    entrada: fecha,
+    termino: fecha / null
+  },
+  alcance: {
+    caso_de_uso: tstr,
+    clase_riesgo: tstr,
+    rol_regulatorio: tstr,
+    sector: tstr,
+    categorias_datos: tstr,
+    autonomia: tstr,
+    destinatarios: tstr
+  },
+  naturaleza: "prohibicion" / "obligacion" / "condicion" / "definicion",
+  operacionalidad: "L1" / "L2" / "L3" / "L4",
+  clase_de_efecto: "EF-1" / "EF-2" / "EF-3" / "EF-4" / "EF-5" / "EF-6"
+                 / "EF-7" / "EF-8" / "EF-9" / "EF-10" / "EF-11" / "EF-12",
+  predicado: any,
+  evidencia_exigida: [* requisito-evidencia],
+  acciones_obligatorias: [* tstr],
+  condiciones_de_denegacion: [* tstr],
+  escalado: escalado / null,
+  monitorizacion: monitorizacion / null,
+  interpretacion: {
+    texto: tstr .size (1..65535),
+    autor: tstr .size (1..512),
+    digest_aprobacion: bstr .size 48
+  },
+  ambigua: bool,
+  rango: "P0" / "P1" / "P2" / "P3" / "P4" / "P5",
+  hash: bstr .size 48
+}
+
+fecha = {
+  anio: uint .le 9999,
+  mes: 1..12,
+  dia: 1..31
+}
+
+requisito-evidencia = {
+  productor: tstr,
+  antiguedad_maxima_segundos: uint
+}
+
+escalado = {
+  rol: tstr,
+  competencia: tstr,
+  quorum: uint,
+  plazo_segundos: uint,
+  exige_independencia: bool
+}
+
+monitorizacion = {
+  que: tstr,
+  periodo_segundos: uint,
+  umbral: tstr
+}

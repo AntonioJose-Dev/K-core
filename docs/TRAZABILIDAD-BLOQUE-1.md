@@ -1,0 +1,57 @@
+# Registro de trazabilidad — Bloque 1
+
+Fuente canónica: `K-CORE/KERNEL/MATRIZ MAESTRA CANONICA - Sovereign AI Kernel v1.1.md`
+(solo lectura; este repositorio no la modifica).
+
+## Decisiones vinculantes del operador
+
+| Fecha | Decisión |
+|---|---|
+| 2026-07-28 | Plan del Bloque 1 aprobado: estructura, invariantes, tests, límites declarados y orden de ejecución. |
+| 2026-07-28 | Lista cerrada de 8 símbolos aprobada: `sak_decidir`, `sak_ejercer`, `sak_estado`, `sak_salud`, `sak_exportar_evidencia`, `sak_verificar`, `sak_version`, `sak_describir_abi`. |
+| 2026-07-28 | `sak_describir_abi` sustituye a `sak_liberar` (familia observar; devuelve versión, esquema, capacidades públicas y hash de `SYMBOLS.lock`, sin autoridad). |
+| 2026-07-28 | Sin símbolo público de gestión de memoria: el FFI usa buffers proporcionados por el llamador o salida de tamaño fijo y documentada. No se añade novena vía pública. |
+| 2026-07-29 | **Nomenclatura:** queda prohibido llamar «bloque de Matriz» / «bloque §M» a rebanadas `bloque12`…`bloque20`. Son implementaciones EF-3…EF-11 (C/E/F). Ver `docs/TRAZABILIDAD-REBANADAS-EF3-EF11.md`. |
+| 2026-07-29 | **§M 11 CERRADO** (brechas J.1–J.4/J.6 cerradas): etiquetas mezcla DENY, J.2×13 literales, patrones J.4 v1, uso/revocación, escalados/plazo, `PruebaInclusion` post-redacción, PII AES-256-GCM+90d (decisión impl), NO_AFIRMADO operador. Siguiente: **§M 12**. |
+
+## Mapa entregable → invariante → archivo → criterio/test
+
+| Parte del entregable (M, fila 1) | Invariante | Archivo | Criterio / test | Estado |
+|---|---|---|---|---|
+| Tipos de decisión (códigos G.3, orden R2, traza) | INV-02, INV-14 | `crates/sak-core/src/decision.rs` | Usados por cierre conservador y recomputación | Esqueleto |
+| Contexto tipado y hechos firmados | INV-14 | `crates/sak-core/src/contexto.rs` | Harness `pureza_de_decision` | Esqueleto |
+| Perfil normativo como dato (costura Bloque 2) | INV-02 | `crates/sak-core/src/perfil.rs` | Test `DENY(SIN_NORMA_APLICABLE)` | Esqueleto |
+| Presupuesto de pasos con corte determinista | INV-14 | `crates/sak-core/src/presupuesto.rs` | Test `DENY(NORMA_NO_EVALUABLE)` al agotar, mismo paso siempre | Esqueleto |
+| Función pura `decidir()` con ínfimo R2 | INV-02, INV-14 | `crates/sak-core/src/motor.rs` | `pureza_de_decision`; recomputación bit a bit | Esqueleto |
+| `Capability` con constructor privado; `emitir(...)` | INV-01 | `crates/sak-core/src/capacidad.rs` | Compile-fail `capacidad_exige_decision` | Esqueleto |
+| Lista cerrada de ocho símbolos | INV-01, INV-06 | `SYMBOLS.lock` | Enumeración del binario contra la lista, bloqueante (L-01) | **Creado** |
+| Frontera externa `cdylib` (8 símbolos) | INV-01, INV-06 | `crates/sak-abi/src/lib.rs` | `ci/check_symbols.ps1` contra `SYMBOLS.lock` | Esqueleto |
+| Proceso independiente de recomputación | INV-14 | `crates/sak-recompute/src/main.rs` | Comparación byte a byte del conjunto de conformidad | Esqueleto (sale con código 2) |
+| Conjunto de conformidad | INV-14 | `conformance/bloque1/` | Entradas y salidas canónicas para recomputación | Esqueleto (solo README) |
+
+## Pendientes del Bloque 1 (orden de ejecución aprobado)
+
+1. ~~Esqueleto del workspace, toolchain, `SYMBOLS.lock`, `git init`~~ — esqueleto **hecho**; `git init` **pendiente** (terminal sin respuesta en la sesión actual).
+2. Tipos de `sak-core` (decisión, códigos, contexto, hechos).
+3. Motor puro con presupuesto, cierre conservador e ínfimo R2.
+4. `capacidad.rs` con constructor privado y `emitir`.
+5. `sak-abi` con los 8 símbolos.
+6. Conjunto de conformidad y `sak-recompute`.
+7. Tests (`pureza_de_decision`, `capacidad_exige_decision`, cierre conservador, presupuesto) y puerta de símbolos en CI (`ci/check_symbols.ps1`).
+8. Ejecución de los dos criterios de aceptación y reporte con evidencia.
+
+## Pendientes técnicos registrados
+
+| Pendiente | Motivo | Dónde se resuelve |
+|---|---|---|
+| `git init` del repositorio | Terminal sin respuesta en la sesión actual | Paso 1, al recuperar el terminal |
+| Pin de versión exacta en `rust-toolchain.toml` | No se pudo verificar la toolchain instalada (`rustc --version` sin respuesta) | Paso 1, al recuperar el terminal |
+| Compilación de verificación del esqueleto (`cargo check`) | Igual que lo anterior | Antes del paso 2 |
+
+## Límites declarados del Bloque 1
+
+- `PerfilNormativo` es dato mínimo de prueba; objeto de norma, lenguaje de predicados y precedencia completa: **Bloque 2**.
+- `CompromisoEvidencia` es tipo opaco; cadena de evidencia y verificador independiente: **Bloque 3**.
+- `HechoFirmado` lleva la firma como dato; verificación criptográfica de productores: **Bloques 3–4**.
+- Sin servidor ni red: biblioteca + ABI + binario de recomputación.
+- `unsafe` mínimo y auditado solo en `sak-abi` (lectura de buffers FFI); `sak-core` con `#![forbid(unsafe_code)]` (mitigación de INV-06).

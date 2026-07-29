@@ -1,0 +1,12 @@
+[package]
+name = "sak-abi"
+description = "Frontera externa cerrada del Sovereign AI Kernel: cdylib con exactamente los 8 símbolos de SYMBOLS.lock"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sak-core = { path = "../sak-core" }

@@ -1,0 +1,3 @@
+# Toolchain del proyecto. Fijada tras verificación local (2026-07-29).
+[toolchain]
+channel = "1.96.0"

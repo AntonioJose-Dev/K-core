@@ -1,0 +1,13 @@
+[package]
+name = "sak-core"
+description = "Núcleo autoritativo del Sovereign AI Kernel"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+sha2 = { workspace = true }
+hmac = { workspace = true }
+aes-gcm = { workspace = true }
+fips204 = { workspace = true }
+fips205 = { workspace = true }
