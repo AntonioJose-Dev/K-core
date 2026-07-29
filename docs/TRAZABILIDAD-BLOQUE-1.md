@@ -12,7 +12,7 @@ Fuente canónica: `K-CORE/KERNEL/MATRIZ MAESTRA CANONICA - Sovereign AI Kernel v
 | 2026-07-28 | `sak_describir_abi` sustituye a `sak_liberar` (familia observar; devuelve versión, esquema, capacidades públicas y hash de `SYMBOLS.lock`, sin autoridad). |
 | 2026-07-28 | Sin símbolo público de gestión de memoria: el FFI usa buffers proporcionados por el llamador o salida de tamaño fijo y documentada. No se añade novena vía pública. |
 | 2026-07-29 | **Nomenclatura:** queda prohibido llamar «bloque de Matriz» / «bloque §M» a rebanadas `bloque12`…`bloque20`. Son implementaciones EF-3…EF-11 (C/E/F). Ver `docs/TRAZABILIDAD-REBANADAS-EF3-EF11.md`. |
-| 2026-07-29 | **§M 11 CERRADO** (brechas J.1–J.4/J.6 cerradas): etiquetas mezcla DENY, J.2×13 literales, patrones J.4 v1, uso/revocación, escalados/plazo, `PruebaInclusion` post-redacción, PII AES-256-GCM+90d (decisión impl), NO_AFIRMADO operador. Siguiente: **§M 12**. |
+| 2026-07-29 | **§M 11 CERRADO EN CÓDIGO Y PRUEBAS** — commit `1ddd1b33dcca67f32defbbb902f8cb1c770c894b`; `cargo test -p sak-core --tests` 208/0; `sak-verify --self-test` `m11_expediente_ok=true`. Registro: `docs/CERRADO-M11.md` + Matriz §M. Límites DESP/VAL-EXT/GOB abiertos. Siguiente: **§M 12** (`docs/CONTRATO-M12-PERFILES-AVANZADOS.md`). |
 
 ## Mapa entregable → invariante → archivo → criterio/test
 

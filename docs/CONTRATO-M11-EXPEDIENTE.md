@@ -1,9 +1,9 @@
-# Contrato literal — §M 11 (implementado)
+# Contrato literal — §M 11 (CERRADO EN CÓDIGO Y PRUEBAS)
 
 Fuente: Matriz Maestra Canónica v1.1, §M fila **11**, secciones **J.1–J.6**, **INV-15**, **INV-16**, **L-08**, **L-09**, **H-4**.  
 Este documento **no añade** requisitos. No incluye §M 12.
 
-**Estado:** criterios de aceptación §M 11 ejercidos en `crates/sak-core/tests/m11_expediente.rs` y `sak-verify --self-test` (bloque expediente J.2).
+**Estado:** **CERRADO EN CÓDIGO Y PRUEBAS** — 2026-07-29; commit `1ddd1b33dcca67f32defbbb902f8cb1c770c894b`; ver `docs/CERRADO-M11.md`. Criterios ejercidos en `crates/sak-core/tests/m11_expediente.rs` y `sak-verify --self-test`.
 
 ## Entregable (§M 11)
 
