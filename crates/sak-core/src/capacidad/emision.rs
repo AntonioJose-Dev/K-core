@@ -17,6 +17,8 @@ pub enum ErrorEmision {
     VencimientoInconsistente,
     /// EF-9 no emite capacidades: se prohíbe o se confina (rebanada EF-9; C/INV-11).
     EfectoEf9Prohibido,
+    /// EF-12 nunca se concede a un sistema de IA (§M 12 / C).
+    EfectoEf12Nunca,
 }
 
 impl fmt::Display for ErrorEmision {
@@ -30,6 +32,9 @@ impl fmt::Display for ErrorEmision {
             ErrorEmision::VencimientoInconsistente => write!(f, "vencimiento inconsistente"),
             ErrorEmision::EfectoEf9Prohibido => {
                 write!(f, "EF-9 no emite capacidades (prohibido o no confinado)")
+            }
+            ErrorEmision::EfectoEf12Nunca => {
+                write!(f, "EF-12 nunca se concede a un sistema de IA")
             }
         }
     }
@@ -137,6 +142,14 @@ pub fn emitir(
         .any(|t| t == "EF-9" || t.starts_with("EF-9|") || t.starts_with("ef9:"))
     {
         return Err(ErrorEmision::EfectoEf9Prohibido);
+    }
+    if params
+        .alcance
+        .tokens()
+        .iter()
+        .any(|t| t == "EF-12" || t.starts_with("EF-12|") || t.starts_with("ef12:"))
+    {
+        return Err(ErrorEmision::EfectoEf12Nunca);
     }
     let emitido_en = reloj.ahora();
     let vive_hasta = emitido_en.saturating_add(params.ttl_ticks);

@@ -28,6 +28,9 @@ pub enum PerfilEf9 {
     CodigoProhibido,
     /// Única ruta: runtime de perfil mínimo. **No** afirma C5 ni confinamiento efectivo.
     ConfinadoPendienteAtestacion,
+    /// §M 12: atestación I.10 vigente ⇒ EF-9 cerrado como canal ambiental.
+    /// **No** afirma `C5_HOST_REAL` (solo hechos aportados al Libro).
+    ConfinadoAtestado,
 }
 
 impl PerfilEf9 {
@@ -35,17 +38,23 @@ impl PerfilEf9 {
         match self {
             PerfilEf9::CodigoProhibido => "codigo_prohibido",
             PerfilEf9::ConfinadoPendienteAtestacion => "confinado_pendiente_atestacion",
+            PerfilEf9::ConfinadoAtestado => "confinado_atestado",
         }
     }
 
-    /// Siempre falso: C5 no está implementado (pendiente criterio §M 12).
-    pub const fn afirma_c5(self) -> bool {
+    /// Siempre falso: no se afirma C5 de host real.
+    pub const fn afirma_c5_host_real(self) -> bool {
         false
     }
 
-    /// Siempre falso hasta atestación real de plataforma.
+    /// Alias histórico: nunca afirma C5 de host.
+    pub const fn afirma_c5(self) -> bool {
+        self.afirma_c5_host_real()
+    }
+
+    /// Confinamiento efectivo atestado (hecho CONFINADO), no propiedad de host.
     pub const fn afirma_confinamiento_efectivo(self) -> bool {
-        false
+        matches!(self, PerfilEf9::ConfinadoAtestado)
     }
 }
 
@@ -205,16 +214,15 @@ impl EvaluadorEf9 {
 
         let abierto = match perfil {
             PerfilEf9::CodigoProhibido => {
-                // Solo cerrado si la observación demuestra ausencia de código.
                 !(obs.demostracion_codigo_ausente && obs.senales.is_empty())
             }
             PerfilEf9::ConfinadoPendienteAtestacion => {
-                // Runtime mínimo declarado no basta: sin atestación, no se cierra EF-9
-                // como confinamiento efectivo; se mantiene abierto salvo demostración.
                 let _ = (obs.runtime_minimo_declarado, obs.salida_solo_mediada);
-                // No registrar CONFINADO=true: C5 / confinamiento efectivo no implementados.
                 true
             }
+            // §M 12: atestación vigente ⇒ canal ambiental cerrado si no hay señales.
+            // No afirma C5_HOST_REAL.
+            PerfilEf9::ConfinadoAtestado => !obs.senales.is_empty(),
         };
 
         let hecho = HechoFirmadoLibro::firmar(
@@ -286,6 +294,8 @@ impl EvaluadorEf9 {
         let (codigo, tag) = match perfil {
             PerfilEf9::CodigoProhibido => (CodigoPep::Ef9Prohibido, 2u8),
             PerfilEf9::ConfinadoPendienteAtestacion => (CodigoPep::Ef9NoConfinado, 3u8),
+            // Ejecución EF-9 sigue sin mediarse: DENY aunque el perfil esté atestado.
+            PerfilEf9::ConfinadoAtestado => (CodigoPep::Ef9Prohibido, 2u8),
         };
 
         self.denegaciones
@@ -302,7 +312,9 @@ impl EvaluadorEf9 {
         let _ = ledger.registrar_evento_sistema(sujeto, TipoRegistro::Ef9, payload);
 
         match perfil {
-            PerfilEf9::CodigoProhibido => ResultadoEvaluacionEf9::DenegadoProhibido { codigo },
+            PerfilEf9::CodigoProhibido | PerfilEf9::ConfinadoAtestado => {
+                ResultadoEvaluacionEf9::DenegadoProhibido { codigo }
+            }
             PerfilEf9::ConfinadoPendienteAtestacion => {
                 ResultadoEvaluacionEf9::DenegadoNoConfinado { codigo }
             }

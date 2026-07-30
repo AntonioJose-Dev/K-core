@@ -1,6 +1,16 @@
 //! Niveles C0–C5 del Libro de Control.
+//!
+//! `NivelControl::C5` como resultado de `calcular_nivel_base` se denomina
+//! explícitamente [`C5_CALCULADO_SOBRE_HECHOS_APORTADOS`]. Queda prohibido
+//! inferir o declarar [`C5_HOST_REAL_PROHIBIDO`].
 
 use std::fmt;
+
+/// Denominación normativa cuando el cálculo D.3 sobre hechos aportados produce C5.
+pub const C5_CALCULADO_SOBRE_HECHOS_APORTADOS: &str = "C5_CALCULADO_SOBRE_HECHOS_APORTADOS";
+
+/// Etiqueta prohibida: no inferir ni declarar C5 como propiedad del host real.
+pub const C5_HOST_REAL_PROHIBIDO: &str = "C5_HOST_REAL";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u8)]
@@ -22,6 +32,15 @@ impl NivelControl {
             NivelControl::C3 => "C3",
             NivelControl::C4 => "C4",
             NivelControl::C5 => "C5",
+        }
+    }
+
+    /// Si es C5, la denominación de prueba/auditoría (nunca `C5_HOST_REAL`).
+    pub fn denominacion_c5_calculado(self) -> Option<&'static str> {
+        if self == NivelControl::C5 {
+            Some(C5_CALCULADO_SOBRE_HECHOS_APORTADOS)
+        } else {
+            None
         }
     }
 

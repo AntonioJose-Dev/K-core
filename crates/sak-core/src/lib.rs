@@ -1,10 +1,10 @@
 //! sak-core — Núcleo autoritativo del Sovereign AI Kernel.
 //!
-//! Alcance de código: entregables §M 1–10 (plan Matriz) más rebanadas de
+//! Alcance de código: entregables §M 1–12 (plan Matriz) más rebanadas de
 //! repositorio para PEPs EF-1…EF-8, EF-10–EF-11 y régimen EF-9 (C/E/F; **no**
-//! son filas §M 13+). Ver `docs/TRAZABILIDAD-REBANADAS-EF3-EF11.md`.
-//! No afirma C5, HSM, atestación de plataforma, hardware real, despliegue
-//! real, completitud de inventario ni conformidad legal.
+//! son filas §M posteriores a 12). Ver `docs/TRAZABILIDAD-REBANADAS-EF3-EF11.md`.
+//! No afirma C5_HOST_REAL, HSM, atestación de plataforma real, hardware real,
+//! despliegue real, completitud de inventario ni conformidad legal.
 //!
 //! Restricciones: `#![forbid(unsafe_code)]` en la ruta de decisión. El módulo
 //! `crypto` usa crates auditados FIPS 204/205 sin `unsafe` propio.

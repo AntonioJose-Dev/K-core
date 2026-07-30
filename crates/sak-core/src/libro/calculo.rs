@@ -1,4 +1,9 @@
 //! Algoritmo D.3: nivel base + degradación transitiva EF-9 / ALCANZABLES.
+//!
+//! Un resultado `NivelControl::C5` en este módulo es **solo**
+//! `C5_CALCULADO_SOBRE_HECHOS_APORTADOS`. Queda prohibido inferir o declarar
+//! `C5_HOST_REAL` (host / TCB / plataforma / atestación real / red /
+//! completitud de inventario permanecen `no_comprobado` / [DESP] / [VAL-EXT]).
 
 use crate::contexto::ClaseEfecto;
 use crate::identidad::IdSistema;
@@ -33,6 +38,8 @@ pub struct VistaHechos {
 /// Matriz D.3 — primera regla que se satisface fija el nivel base.
 ///
 /// C2 = `CUSTODIA ∧ ¬(EXCLUSIVIDAD ∧ SONDA_OK)` (literal D.3; no C3 incompleto).
+/// Si el resultado es C5, la denominación normativa de prueba/auditoría es
+/// [`denominacion_si_c5_calculado`] → `C5_CALCULADO_SOBRE_HECHOS_APORTADOS`.
 pub fn calcular_nivel_base(v: VistaHechos) -> NivelControl {
     if v.confinado
         && v.delegado
@@ -56,6 +63,12 @@ pub fn calcular_nivel_base(v: VistaHechos) -> NivelControl {
         return NivelControl::C1;
     }
     NivelControl::C0
+}
+
+/// Denominación explícita cuando el cálculo sobre hechos aportados produce C5.
+/// Nunca retorna ni implica `C5_HOST_REAL`.
+pub fn denominacion_si_c5_calculado(nivel: NivelControl) -> Option<&'static str> {
+    nivel.denominacion_c5_calculado()
 }
 
 pub fn bypass_residual_de(nivel: NivelControl) -> &'static str {
