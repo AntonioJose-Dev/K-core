@@ -300,6 +300,11 @@ impl Norma {
         arr
     }
 
+    /// Texto canónico de la norma (INV-03 / conservación de paquete).
+    pub fn serializar_texto_canonico(&self) -> Vec<u8> {
+        self.serializar_canonico_sin_hash()
+    }
+
     fn serializar_canonico_sin_hash(&self) -> Vec<u8> {
         let mut out = Vec::new();
         escribir(&mut out, self.identificador.como_str());

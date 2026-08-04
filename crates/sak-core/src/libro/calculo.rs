@@ -143,6 +143,9 @@ pub fn vista_desde_hechos(
     let mut caducados = Vec::new();
 
     for h in hechos {
+        if !h.integridad_ok() {
+            continue;
+        }
         if h.sistema != *sistema {
             continue;
         }

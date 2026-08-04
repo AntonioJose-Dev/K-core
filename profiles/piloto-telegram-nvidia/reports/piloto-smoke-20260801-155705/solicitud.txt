@@ -1,0 +1,6 @@
+﻿Payload EF-1 actual: OpenAI-compatible chat/completions
+model: minimaxai/minimax-m3 (const, no configurable)
+endpoint: https://integrate.api.nvidia.com/v1/chat/completions (const)
+digest_parametros: SHA-384 del payload canonico
+Nota: No se modifica ni se anade contenido semantico en esta fase.
+El harness no expone ni transmite la clave API.

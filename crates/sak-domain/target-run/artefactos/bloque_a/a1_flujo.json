@@ -1,0 +1,15 @@
+{
+  "fase": "A1",
+  "pasos": [
+    {"op":"obs.salud","resultado":"OK","codigo":"SALUD"},
+    {"op":"con.sistema.alta","resultado":"OK","codigo":"ALTA_OK"},
+    {"op":"con.pasaporte.emitir","resultado":"OK","codigo":"PASAPORTE_EMITIDO"},
+    {"op":"con.pasaporte.get","resultado":"OK","codigo":"PASAPORTE"},
+    {"op":"con.pep.vista","resultado":"OK","codigo":"PEP_VISTA"},
+    {"op":"con.inventario.alcanzables","resultado":"OK","codigo":"ALCANZABLES_OK"},
+    {"op":"cus.alta_referencia","resultado":"OK","codigo":"REF_ALTA_OK"},
+    {"op":"obs.evidencia.verificar","resultado":"OK"}
+  ],
+  "afirmacion_permitida": "Bloque A: registro + custodia de referencias + DENY en canal operador. No afirma frontera unica de efectos del agente.",
+  "afirmacion_no_permitida": "mediacion end-to-end agente→modelo/herramientas/datos via Kernel"
+}

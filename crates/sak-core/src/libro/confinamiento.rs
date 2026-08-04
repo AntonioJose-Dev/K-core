@@ -259,7 +259,9 @@ impl AtestacionConfinamiento {
             InventarioAlcanzables::NO_DEMUESTRA,
             firmante,
         )?;
-        libro.registrar_hecho(hecho);
+        libro
+            .registrar_hecho(hecho)
+            .map_err(|_| crate::crypto::ErrorCrypto::Verificacion)?;
         Ok(())
     }
 }

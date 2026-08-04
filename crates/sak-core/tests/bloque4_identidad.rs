@@ -40,6 +40,7 @@ fn mundo() -> Mundo {
             sk_cliente.public.clone(),
             10_000,
             50_000,
+            20_000,
         )
         .unwrap();
     Mundo {
@@ -118,7 +119,7 @@ fn pasaporte_vencido_deny_sin_registro() {
     let mut ca = AutoridadCertificacion::generar().unwrap();
     let sk = ParMlDsa87::generar().unwrap();
     let art = ca
-        .emitir_artefacto(&pasaporte, sistema, sk.public.clone(), 1_000, 50_000)
+        .emitir_artefacto(&pasaporte, sistema, sk.public.clone(), 1_000, 50_000, 1_500)
         .unwrap();
     let digest = [7u8; LONGITUD_HASH_PAQUETE];
     let pet = PeticionIdentidad {

@@ -1,0 +1,7 @@
+{
+  "fase": "A2+A4",
+  "marcadores_ok": 12,
+  "afirmacion_permitida": "UI muestra checklist Bloque A y disclaimer de no-mediacion; sin autoridad.",
+  "afirmacion_no_permitida": "Mediacion end-to-end ni conformidad certificada.",
+  "doc_checklist": "docs/ACEPTACION-BLOQUE-A.md"
+}

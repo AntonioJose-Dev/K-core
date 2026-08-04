@@ -122,7 +122,7 @@ fn caducidad_conservadora_decae_solo() {
         TipoHecho::SondaOk,
         TipoHecho::Delegado,
     ] {
-        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk));
+        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk)).unwrap();
     }
     assert_eq!(
         libro.evaluar(&sistema(), c, 0).nivel_vigente,
@@ -141,7 +141,7 @@ fn ninguna_api_eleva_niveles() {
     let fk = firmante();
     let mut libro = LibroControl::nuevo();
     let c = ClaseEfecto::Ef2;
-    libro.registrar_hecho(hecho(TipoHecho::Observable, Some(c), true, 0, &fk));
+    libro.registrar_hecho(hecho(TipoHecho::Observable, Some(c), true, 0, &fk)).unwrap();
     assert_eq!(
         libro.evaluar(&sistema(), c, 0).nivel_vigente,
         NivelControl::C1
@@ -164,7 +164,7 @@ fn rebaja_manual_permitida() {
         TipoHecho::PepAtestado,
         TipoHecho::SondaOk,
     ] {
-        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk));
+        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk)).unwrap();
     }
     assert_eq!(
         libro.evaluar(&sistema(), c, 0).nivel_vigente,
@@ -198,9 +198,9 @@ fn degradacion_ef9_y_alcanzables() {
         TipoHecho::SondaOk,
         TipoHecho::Delegado,
     ] {
-        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk));
+        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk)).unwrap();
     }
-    libro.registrar_hecho(hecho(TipoHecho::Ef9Abierto, None, true, 0, &fk));
+    libro.registrar_hecho(hecho(TipoHecho::Ef9Abierto, None, true, 0, &fk)).unwrap();
     let mut set = BTreeSet::new();
     set.insert(ClaseEfecto::Ef1);
     libro.registrar_alcanzables(
@@ -227,9 +227,9 @@ fn cierre_conservador_sin_inventario_alcanzables() {
         TipoHecho::SondaOk,
         TipoHecho::Delegado,
     ] {
-        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk));
+        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk)).unwrap();
     }
-    libro.registrar_hecho(hecho(TipoHecho::Ef9Abierto, None, true, 0, &fk));
+    libro.registrar_hecho(hecho(TipoHecho::Ef9Abierto, None, true, 0, &fk)).unwrap();
     // Sin inventario ALCANZABLES
     let eval = libro.evaluar(&sistema(), c, 0);
     assert_eq!(eval.nivel_vigente, NivelControl::C2);
@@ -267,9 +267,9 @@ fn declarar_efector_degrada_clase() {
         TipoHecho::SondaOk,
         TipoHecho::Delegado,
     ] {
-        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk));
+        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk)).unwrap();
     }
-    libro.registrar_hecho(hecho(TipoHecho::Ef9Abierto, None, true, 0, &fk));
+    libro.registrar_hecho(hecho(TipoHecho::Ef9Abierto, None, true, 0, &fk)).unwrap();
     libro
         .declarar_efector_alcanzable(&sistema(), c, 0, 1, &fk)
         .unwrap();
@@ -328,7 +328,7 @@ fn pep_ef1_ef2_solo_hechos_sostenibles() {
         } else {
             Some(c)
         };
-        libro.registrar_hecho(hecho(t, clase, true, 0, &fk));
+        libro.registrar_hecho(hecho(t, clase, true, 0, &fk)).unwrap();
     }
     // Añadir exclusividad vía prueba I (no el PEP solo)
     let r = ejecutar_prueba(
@@ -347,7 +347,7 @@ fn pep_ef1_ef2_solo_hechos_sostenibles() {
     )
     .unwrap();
     for h in r.hechos {
-        libro.registrar_hecho(h);
+        libro.registrar_hecho(h).unwrap();
     }
     let eval = libro.evaluar(&sistema(), c, 0);
     assert_eq!(eval.nivel_vigente, NivelControl::C4);
@@ -400,7 +400,7 @@ fn trampa_usada_fuerza_c0() {
         TipoHecho::PepAtestado,
         TipoHecho::SondaOk,
     ] {
-        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk));
+        libro.registrar_hecho(hecho(t, Some(c), true, 0, &fk)).unwrap();
     }
     libro.credencial_trampa_usada(&sistema(), c, 1);
     assert_eq!(

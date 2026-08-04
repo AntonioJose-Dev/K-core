@@ -1,0 +1,11 @@
+﻿
+running 1 test
+test smoke_nvidia_ef1_cadena_completa ... FAILED
+
+failures:
+
+failures:
+    smoke_nvidia_ef1_cadena_completa
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.65s
+

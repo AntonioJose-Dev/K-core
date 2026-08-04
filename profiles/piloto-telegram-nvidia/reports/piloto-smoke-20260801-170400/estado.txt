@@ -1,0 +1,17 @@
+﻿resultado=TEST_OK
+handle=ef1-piloto-nvidia
+proveedor=nvidia
+custodia=presente
+veredicto=ALLOW
+codigo_decidir=ALLOW_EMITIDO
+ok=false
+codigo_ejercer=Evidencia("fallo interno del proveedor")
+llamadas_delegadas=0
+digest_resultado=NONE
+referencia_minima=nvidia:NONE
+test_exit_code=0
+diag_key_present=true
+diag_key_len=70
+diag_fase=http_send
+diag_clase=Timeout
+diag_elapsed_ms=122006

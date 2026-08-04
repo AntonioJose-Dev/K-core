@@ -1,0 +1,12 @@
+﻿resultado=TEST_FAIL
+handle=
+proveedor=nvidia
+custodia=presente
+veredicto=
+codigo_decidir=
+ok=
+codigo_ejercer=
+llamadas_delegadas=0
+digest_resultado=
+referencia_minima=nvidia:
+test_exit_code=101

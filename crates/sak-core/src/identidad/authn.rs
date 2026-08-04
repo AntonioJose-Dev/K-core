@@ -32,16 +32,18 @@ impl IdentidadResuelta {
 pub enum ErrorAuthn {
     FirmaCaInvalida,
     ArtefactoNoVigente,
+    ArtefactoRevocado,
+    ArtefactoDesconocido,
     PruebaClienteInvalida,
     PruebaServidorInvalida,
     DigestsDistintos,
 }
 
-/// Autenticación mutua obligatoria (H.2 / componente identidad de workload).
+/// Autenticación local H.2 (perfil escritorio [VAL-EXT]; sin mTLS).
 ///
-/// 1. Verifica la firma de la CA sobre el artefacto y su vigencia.
+/// 1. Verifica que el certificado es conocido, no revocado, firmado por la CA y vigente.
 /// 2. Verifica que el cliente posee la clave del artefacto.
-/// 3. Verifica que el servidor (CA) firmó el **mismo** digest de petición.
+/// 3. Verifica que el servidor (CA) firmó el **mismo** digest de petición (local).
 ///
 /// **No** consulta ningún campo autodeclarado.
 pub fn autenticar_mutua(
@@ -53,6 +55,17 @@ pub fn autenticar_mutua(
 ) -> Result<IdentidadResuelta, ErrorAuthn> {
     if prueba_cliente.digest_peticion != prueba_servidor.digest_peticion {
         return Err(ErrorAuthn::DigestsDistintos);
+    }
+    if !ca.emitidos().contains_key(&artefacto.serial) {
+        return Err(ErrorAuthn::ArtefactoDesconocido);
+    }
+    if ca.revocados().contains(&artefacto.serial) {
+        return Err(ErrorAuthn::ArtefactoRevocado);
+    }
+    if let Some(orig) = ca.emitidos().get(&artefacto.serial) {
+        if orig != artefacto {
+            return Err(ErrorAuthn::FirmaCaInvalida);
+        }
     }
     if !ca.verificar_firma_artefacto(artefacto) {
         return Err(ErrorAuthn::FirmaCaInvalida);
@@ -71,7 +84,6 @@ pub fn autenticar_mutua(
     {
         return Err(ErrorAuthn::PruebaClienteInvalida);
     }
-    // El servidor se autentica con la clave de la CA del Kernel.
     if ParMlDsa87::verificar(
         ca.pk_bytes(),
         &prueba_servidor.digest_peticion,
@@ -89,14 +101,24 @@ pub fn autenticar_mutua(
     })
 }
 
-/// Atajo: solo artefacto+cliente (sin prueba de servidor). Conservado para tests
-/// unitarios de posesión; la puerta H.2 exige [`autenticar_mutua`].
+/// Atajo: solo artefacto+cliente (sin prueba de servidor).
 pub fn autenticar_artefacto(
     ca: &AutoridadCertificacion,
     artefacto: &ArtefactoCliente,
     prueba: &PruebaPosesion,
     instante_epoch_dias: u32,
 ) -> Result<IdentidadResuelta, ErrorAuthn> {
+    if !ca.emitidos().contains_key(&artefacto.serial) {
+        return Err(ErrorAuthn::ArtefactoDesconocido);
+    }
+    if ca.revocados().contains(&artefacto.serial) {
+        return Err(ErrorAuthn::ArtefactoRevocado);
+    }
+    if let Some(orig) = ca.emitidos().get(&artefacto.serial) {
+        if orig != artefacto {
+            return Err(ErrorAuthn::FirmaCaInvalida);
+        }
+    }
     if !ca.verificar_firma_artefacto(artefacto) {
         return Err(ErrorAuthn::FirmaCaInvalida);
     }

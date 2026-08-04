@@ -37,6 +37,21 @@ impl TipoHecho {
         }
     }
 
+    pub fn desde_token(s: &str) -> Option<Self> {
+        match s {
+            "CUSTODIA" => Some(TipoHecho::Custodia),
+            "EXCLUSIVIDAD" => Some(TipoHecho::Exclusividad),
+            "PEP_ATESTADO" => Some(TipoHecho::PepAtestado),
+            "SONDA_OK" => Some(TipoHecho::SondaOk),
+            "DELEGADO" => Some(TipoHecho::Delegado),
+            "CONFINADO" => Some(TipoHecho::Confinado),
+            "OBSERVABLE" => Some(TipoHecho::Observable),
+            "EF9_ABIERTO" => Some(TipoHecho::Ef9Abierto),
+            "ALCANZABLES" => Some(TipoHecho::Alcanzables),
+            _ => None,
+        }
+    }
+
     /// Hechos de detección de elusión (requieren prueba §I).
     pub fn es_elusion(self) -> bool {
         matches!(
@@ -107,6 +122,21 @@ impl ProductorHecho {
             TipoHecho::Alcanzables => ProductorHecho::InventarioAlcanzables,
         }
     }
+
+    pub fn desde_token(s: &str) -> Option<Self> {
+        match s {
+            "custodia_secretos" => Some(ProductorHecho::CustodiaSecretos),
+            "deteccion_bypass" => Some(ProductorHecho::DeteccionBypass),
+            "registro_pep" => Some(ProductorHecho::RegistroPep),
+            "sonda_adversarial" => Some(ProductorHecho::SondaAdversarial),
+            "emisor_capacidades" => Some(ProductorHecho::EmisorCapacidades),
+            "atestacion_confinamiento" => Some(ProductorHecho::AtestacionConfinamiento),
+            "ingesta_registros" => Some(ProductorHecho::IngestaRegistros),
+            "inspeccion_configuracion" => Some(ProductorHecho::InspeccionConfiguracion),
+            "inventario_alcanzables" => Some(ProductorHecho::InventarioAlcanzables),
+            _ => None,
+        }
+    }
 }
 
 /// Hecho firmado del Libro. Caducado ⇒ se evalúa como falso.
@@ -124,6 +154,8 @@ pub struct HechoFirmadoLibro {
     pub antigüedad_max: Ticks,
     pub digest: [u8; LONGITUD_HASH_PAQUETE],
     pub firma: Vec<u8>,
+    /// PK del firmante (verificación offline de integridad).
+    pub pk_firmante: Vec<u8>,
     /// Límite explícito de lo que la prueba **no** demuestra.
     pub no_demuestra: &'static str,
 }
@@ -133,9 +165,57 @@ impl HechoFirmadoLibro {
         ahora.saturating_sub(self.emitido_en) <= self.antigüedad_max
     }
 
-    /// Verdadero solo si el hecho está vigente y su valor es true.
+    /// Verdadero solo si el hecho está vigente, íntegro y su valor es true.
     pub fn efectivo(&self, ahora: Ticks) -> bool {
-        self.vigente(ahora) && self.valor
+        self.integridad_ok() && self.vigente(ahora) && self.valor
+    }
+
+    /// Alcance §D.3: hechos de sistema sin clase; el resto con clase.
+    pub fn alcance_ok(&self) -> bool {
+        match self.tipo {
+            TipoHecho::Confinado | TipoHecho::Ef9Abierto | TipoHecho::Alcanzables => {
+                self.clase.is_none()
+            }
+            _ => self.clase.is_some(),
+        }
+    }
+
+    pub fn cuerpo_canonico_sin_firma(&self) -> Vec<u8> {
+        let mut cuerpo = Vec::new();
+        cuerpo.extend_from_slice(self.tipo.token().as_bytes());
+        cuerpo.push(0);
+        cuerpo.extend_from_slice(self.sistema.como_str().as_bytes());
+        cuerpo.push(0);
+        if let Some(c) = self.clase {
+            cuerpo.extend_from_slice(c.token().as_bytes());
+        }
+        cuerpo.push(0);
+        cuerpo.push(u8::from(self.valor));
+        cuerpo.extend_from_slice(self.productor.token().as_bytes());
+        cuerpo.push(0);
+        cuerpo.extend_from_slice(&self.version.to_le_bytes());
+        cuerpo.extend_from_slice(&self.epoca.to_le_bytes());
+        cuerpo.extend_from_slice(&self.emitido_en.to_le_bytes());
+        cuerpo.extend_from_slice(&self.antigüedad_max.to_le_bytes());
+        cuerpo
+    }
+
+    /// Productor asignado, alcance, digest y firma coherentes.
+    pub fn integridad_ok(&self) -> bool {
+        if self.productor != ProductorHecho::para_tipo(self.tipo) {
+            return false;
+        }
+        if !self.alcance_ok() {
+            return false;
+        }
+        let dig = crypto::sha384_dominio(dominio::LIBRO, &self.cuerpo_canonico_sin_firma());
+        if dig != self.digest {
+            return false;
+        }
+        if self.pk_firmante.is_empty() || self.firma.is_empty() {
+            return false;
+        }
+        ParMlDsa87::verificar(&self.pk_firmante, &self.digest, &self.firma).is_ok()
     }
 
     pub fn firmar(
@@ -151,25 +231,7 @@ impl HechoFirmadoLibro {
     ) -> Result<Self, crate::crypto::ErrorCrypto> {
         let productor = ProductorHecho::para_tipo(tipo);
         let antigüedad_max = antigüedad_maxima(tipo);
-        let mut cuerpo = Vec::new();
-        cuerpo.extend_from_slice(tipo.token().as_bytes());
-        cuerpo.push(0);
-        cuerpo.extend_from_slice(sistema.como_str().as_bytes());
-        cuerpo.push(0);
-        if let Some(c) = clase {
-            cuerpo.extend_from_slice(c.token().as_bytes());
-        }
-        cuerpo.push(0);
-        cuerpo.push(u8::from(valor));
-        cuerpo.extend_from_slice(productor.token().as_bytes());
-        cuerpo.push(0);
-        cuerpo.extend_from_slice(&version.to_le_bytes());
-        cuerpo.extend_from_slice(&epoca.to_le_bytes());
-        cuerpo.extend_from_slice(&emitido_en.to_le_bytes());
-        cuerpo.extend_from_slice(&antigüedad_max.to_le_bytes());
-        let digest = crypto::sha384_dominio(dominio::LIBRO, &cuerpo);
-        let firma = firmante.firmar(&digest)?;
-        Ok(HechoFirmadoLibro {
+        let mut h = HechoFirmadoLibro {
             tipo,
             sistema,
             clase,
@@ -179,10 +241,17 @@ impl HechoFirmadoLibro {
             epoca,
             emitido_en,
             antigüedad_max,
-            digest,
-            firma,
+            digest: [0u8; LONGITUD_HASH_PAQUETE],
+            firma: vec![],
+            pk_firmante: firmante.public.clone(),
             no_demuestra,
-        })
+        };
+        if !h.alcance_ok() {
+            return Err(crate::crypto::ErrorCrypto::Clave);
+        }
+        h.digest = crypto::sha384_dominio(dominio::LIBRO, &h.cuerpo_canonico_sin_firma());
+        h.firma = firmante.firmar(&h.digest)?;
+        Ok(h)
     }
 }
 
@@ -213,6 +282,7 @@ pub struct InventarioAlcanzables {
     pub productor_id: String,
     pub digest: [u8; LONGITUD_HASH_PAQUETE],
     pub firma: Vec<u8>,
+    pub pk_firmante: Vec<u8>,
     pub no_demuestra: &'static str,
 }
 
@@ -330,6 +400,7 @@ impl InventarioAlcanzables {
             productor_id: productor_id.into(),
             digest: [0u8; LONGITUD_HASH_PAQUETE],
             firma: Vec::new(),
+            pk_firmante: firmante.public.clone(),
             no_demuestra: Self::NO_DEMUESTRA,
         };
         let digest = crypto::sha384_dominio(dominio::LIBRO, &inv.cuerpo_canonico());
@@ -337,6 +408,20 @@ impl InventarioAlcanzables {
         inv.digest = digest;
         inv.firma = firma;
         Ok(inv)
+    }
+
+    pub fn integridad_ok(&self) -> bool {
+        if self.productor != ProductorHecho::InventarioAlcanzables {
+            return false;
+        }
+        let digest = crypto::sha384_dominio(dominio::LIBRO, &self.cuerpo_canonico());
+        if digest != self.digest {
+            return false;
+        }
+        if self.pk_firmante.is_empty() || self.firma.is_empty() {
+            return false;
+        }
+        ParMlDsa87::verificar(&self.pk_firmante, &self.digest, &self.firma).is_ok()
     }
 
     pub fn verificar_firma(&self, public: &[u8]) -> Result<(), crate::crypto::ErrorCrypto> {

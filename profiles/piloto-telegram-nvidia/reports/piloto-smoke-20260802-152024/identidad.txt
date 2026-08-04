@@ -1,0 +1,2 @@
+﻿operador=antoniojosé\anton
+fecha_utc=2026-08-02T13:20:24.7445249Z

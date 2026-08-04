@@ -21,6 +21,7 @@ pub enum ErrorActivacion {
     Epoca(crate::monitor::ErrorEpoca),
     EstadoInvalido,
     PaqueteNoEncontrado,
+    PersistenciaCorpus,
 }
 
 impl fmt::Display for ErrorActivacion {
@@ -37,6 +38,9 @@ impl fmt::Display for ErrorActivacion {
             ErrorActivacion::Epoca(e) => write!(f, "epoca: {e}"),
             ErrorActivacion::EstadoInvalido => f.write_str("estado de propuesta invalido"),
             ErrorActivacion::PaqueteNoEncontrado => f.write_str("paquete no encontrado"),
+            ErrorActivacion::PersistenciaCorpus => {
+                f.write_str("no se pudo conservar el paquete activado")
+            }
         }
     }
 }
@@ -96,6 +100,22 @@ pub fn activar_en_limite_epoca(
     }
     let nuevo = epoca.avanzar(almacen).map_err(ErrorActivacion::Epoca)?;
     gob.activar(hash, nuevo, ahora)?;
+    // INV-03 / G.5: conservar indefinidamente en el almacén durable (write-once).
+    if let Some(v) = gob.version(hash) {
+        match crate::gobernanza::corpus_durable::conservar_paquete_activado(almacen, v) {
+            Ok(()) => {}
+            Err(crate::gobernanza::corpus_durable::ErrorCorpusDurable::YaExiste) => {
+                // Mismo hash ya conservado (reactivación): no sobrescribe el blob.
+                crate::gobernanza::corpus_durable::reafirmar_activo_en_historial(
+                    almacen,
+                    hash,
+                    nuevo,
+                )
+                .map_err(|_| ErrorActivacion::PersistenciaCorpus)?;
+            }
+            Err(_) => return Err(ErrorActivacion::PersistenciaCorpus),
+        }
+    }
     Ok(nuevo)
 }
 

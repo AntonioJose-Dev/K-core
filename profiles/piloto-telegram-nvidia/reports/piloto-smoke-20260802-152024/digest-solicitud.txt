@@ -1,0 +1,2 @@
+﻿digest_parametros=<del test output>
+tipo=SHA-384 (48 bytes hex)

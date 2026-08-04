@@ -1,6 +1,6 @@
 //! Corpus activo, historial permanente y reconstrucción (G.5).
 
-use crate::decision::HashPaqueteNormativo;
+use crate::decision::{HashPaqueteNormativo, LONGITUD_HASH_PAQUETE};
 use crate::gobernanza::activacion::ErrorActivacion;
 use crate::gobernanza::conformidad::{DiffDecisiones, ReconocimientoCambio};
 use crate::gobernanza::firmantes::FirmaPaquete;
@@ -231,6 +231,26 @@ impl GobernanzaCorpus {
         Ok(())
     }
 
+    /// Restaura una versión ya activada desde almacén durable (INV-03 / G.5).
+    pub fn restaurar_version_activada(&mut self, v: VersionCorpus) {
+        let hash = v.hash;
+        let epoca = v.epoca_activacion.unwrap_or(0);
+        self.versiones.insert(*hash.bytes(), v);
+        if !self
+            .historial_activaciones
+            .iter()
+            .any(|(h, _)| h.bytes() == hash.bytes())
+        {
+            self.historial_activaciones.push((hash, epoca));
+        }
+    }
+
+    pub fn marcar_activo(&mut self, hash: HashPaqueteNormativo) {
+        if self.versiones.contains_key(hash.bytes()) {
+            self.activo = Some(hash);
+        }
+    }
+
     pub fn revocar(
         &mut self,
         hash: &HashPaqueteNormativo,
@@ -249,6 +269,45 @@ impl GobernanzaCorpus {
             self.activo = None;
         }
         // Historia intacta: el hash sigue en historial_activaciones y versiones.
+        Ok(())
+    }
+
+    /// Reversión gobernada: reabre ciclo en `FIRMADA` **sin** borrar expediente,
+    /// firmas ni diff reconocido. No activa ni salta sombra.
+    ///
+    /// Exige entrada en historial de activaciones y rastro (diff + ≥2 firmas).
+    pub fn preparar_reversion_gobernada(
+        &mut self,
+        hash: &HashPaqueteNormativo,
+    ) -> Result<(), ErrorActivacion> {
+        if !self
+            .historial_activaciones
+            .iter()
+            .any(|(h, _)| h.bytes() == hash.bytes())
+        {
+            return Err(ErrorActivacion::EstadoInvalido);
+        }
+        let v = self
+            .versiones
+            .get_mut(hash.bytes())
+            .ok_or(ErrorActivacion::PaqueteNoEncontrado)?;
+        if v.diff.is_none() || v.firmas.len() < 2 {
+            return Err(ErrorActivacion::EstadoInvalido);
+        }
+        // No se puede «saltar» estando aún activo vivo: primero revocar.
+        if self.activo.as_ref() == Some(hash) {
+            return Err(ErrorActivacion::EstadoInvalido);
+        }
+        match v.estado {
+            EstadoPropuesta::Revocada { .. }
+            | EstadoPropuesta::Activa { .. }
+            | EstadoPropuesta::Firmada
+            | EstadoPropuesta::EnSombra { .. } => {
+                // Conserva diff, firmas, reconocimientos, epoca_activacion, revocado_en.
+                v.estado = EstadoPropuesta::Firmada;
+            }
+            _ => return Err(ErrorActivacion::EstadoInvalido),
+        }
         Ok(())
     }
 
@@ -300,5 +359,59 @@ impl GobernanzaCorpus {
             v.push(c.nuevo as u8);
         }
         v
+    }
+
+    /// Reconstituye el diff conservado (G.5 / INV-03). `digest_contexto` no forma
+    /// parte del encoding histórico y se rellena a cero.
+    pub fn deserializar_diff(bytes: &[u8]) -> Result<DiffDecisiones, ()> {
+        if bytes.first() != Some(&4) {
+            return Err(());
+        }
+        let mut i = 1usize;
+        if i + 4 > bytes.len() {
+            return Err(());
+        }
+        let n = u32::from_le_bytes(bytes[i..i + 4].try_into().unwrap()) as usize;
+        i += 4;
+        let mut cambios = Vec::with_capacity(n);
+        for _ in 0..n {
+            if i + 2 > bytes.len() {
+                return Err(());
+            }
+            let id_len = u16::from_le_bytes(bytes[i..i + 2].try_into().unwrap()) as usize;
+            i += 2;
+            if i + id_len + LONGITUD_HASH_PAQUETE + 2 > bytes.len() {
+                return Err(());
+            }
+            let id_caso = String::from_utf8(bytes[i..i + id_len].to_vec()).map_err(|_| ())?;
+            i += id_len;
+            let mut digest_cambio = [0u8; LONGITUD_HASH_PAQUETE];
+            digest_cambio.copy_from_slice(&bytes[i..i + LONGITUD_HASH_PAQUETE]);
+            i += LONGITUD_HASH_PAQUETE;
+            let anterior = veredicto_u8(bytes[i]).ok_or(())?;
+            let nuevo = veredicto_u8(bytes[i + 1]).ok_or(())?;
+            i += 2;
+            cambios.push(crate::gobernanza::conformidad::CambioDecision {
+                id_caso,
+                digest_contexto: [0u8; LONGITUD_HASH_PAQUETE],
+                anterior,
+                nuevo,
+                digest_cambio,
+            });
+        }
+        if i != bytes.len() {
+            return Err(());
+        }
+        Ok(DiffDecisiones { cambios })
+    }
+}
+
+fn veredicto_u8(v: u8) -> Option<crate::decision::Veredicto> {
+    match v {
+        0 => Some(crate::decision::Veredicto::Deny),
+        1 => Some(crate::decision::Veredicto::Suspend),
+        2 => Some(crate::decision::Veredicto::Escalate),
+        3 => Some(crate::decision::Veredicto::Allow),
+        _ => None,
     }
 }

@@ -1,6 +1,10 @@
 # Artefactos de compilación
 /target/
+/target-*/
 **/*.rs.bk
+
+# IDE / observación
+.insp-*
 
 # Cargo.lock SÍ se versiona: la reproducibilidad bit a bit del binario
 # autoritativo (INV-14, criterio del Bloque 1) exige dependencias fijadas.

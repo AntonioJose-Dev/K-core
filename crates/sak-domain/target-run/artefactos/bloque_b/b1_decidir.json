@@ -1,0 +1,7 @@
+{
+  "fase":"B1",
+  "sin_pasaporte":"DENY",
+  "allow":"ALLOW_EMITIDO",
+  "afirmacion_permitida":"Kernel decide con pasaporte/Libro (hecho CUSTODIA→C2)",
+  "afirmacion_no_permitida":"Ejercicio/proveedor mediado (B3+)"
+}

@@ -115,7 +115,7 @@ fn p2_sonda_con_hechos_altos_sigue_deny_por_capacidad_ausente() {
         libro.registrar_hecho(
             HechoFirmadoLibro::firmar(tipo, sys(), clase, true, 1, 1, ahora, "h", &autoridad)
                 .unwrap(),
-        );
+        ).unwrap();
     }
     let res = ejecutar_sonda_doce_sin_capacidad(&libro, &sys(), 1, ahora, &autoridad).unwrap();
     assert!(res.completo_12_deny);

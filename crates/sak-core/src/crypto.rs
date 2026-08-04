@@ -42,6 +42,7 @@ pub mod dominio {
     pub const EF9: &[u8] = b"SAK-EF9-v1|";
     pub const EGRESO: &[u8] = b"SAK-EGRESS-v1|";
     pub const FISICO: &[u8] = b"SAK-PHYS-v1|";
+    pub const CUSTODIA: &[u8] = b"SAK-CUSTODIA-v1|ref|";
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -97,6 +98,22 @@ impl ParMlDsa87 {
             public: pk.into_bytes().to_vec(),
             secret: sk,
         })
+    }
+
+    /// Serializa la clave secreta (persistencia local de la CA del dominio).
+    pub fn bytes_secreto(&self) -> Vec<u8> {
+        self.secret.clone().into_bytes().to_vec()
+    }
+
+    /// Reconstitución desde bytes públicos y secretos.
+    pub fn desde_bytes(public: Vec<u8>, secret: &[u8]) -> Result<Self, ErrorCrypto> {
+        let sk_arr: [u8; ml_dsa_87::SK_LEN] =
+            secret.try_into().map_err(|_| ErrorCrypto::Clave)?;
+        let secret =
+            ml_dsa_87::PrivateKey::try_from_bytes(sk_arr).map_err(|_| ErrorCrypto::Clave)?;
+        let _: [u8; ml_dsa_87::PK_LEN] =
+            public.as_slice().try_into().map_err(|_| ErrorCrypto::Clave)?;
+        Ok(ParMlDsa87 { public, secret })
     }
 
     pub fn firmar(&self, msg: &[u8]) -> Result<Vec<u8>, ErrorCrypto> {

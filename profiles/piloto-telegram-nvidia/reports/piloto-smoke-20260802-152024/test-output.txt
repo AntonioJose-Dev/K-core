@@ -1,0 +1,15 @@
+﻿
+running 1 test
+===SMOKE_NVIDIA_EF1===
+handle=ef1-piloto-nvidia
+veredicto=ALLOW
+codigo_decidir=ALLOW_EMITIDO
+mango=a975247f593cc2787ff5afeceb7e93c05b6e98fa86b8ea35ba8a821dd3bc21559870b1202fd7744c49402a3f4b0cd4c9
+ok=true
+codigo_ejercer=RECIBO_OK
+recibo_digest=c5a481f5f38dcc2ce8ffb14036b354fc6150f1528413a3342fd37006a117e88faf07d1dba629326023b22b0b99a7760a
+===FIN_SMOKE===
+test smoke_nvidia_ef1_cadena_completa ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 18.38s
+

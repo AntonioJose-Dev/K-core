@@ -48,7 +48,7 @@ fn hechos_c4(libro: &mut LibroControl, clase: ClaseEfecto, fk: &ParMlDsa87) {
         libro.registrar_hecho(
             HechoFirmadoLibro::firmar(t, sistema(), Some(clase), true, 1, 1, 0, "test", fk)
                 .unwrap(),
-        );
+        ).unwrap();
     }
 }
 
@@ -225,7 +225,7 @@ fn inventario_caducado_sin_alcanzables_degrada_todas_las_clases() {
             &fk,
         )
         .unwrap(),
-    );
+    ).unwrap();
     // Inventario vacío pero vigente: no degrada clases no listadas.
     let inv_vacio = InventarioAlcanzables::firmar(sistema(), BTreeSet::new(), 1, 1, 0, &fk).unwrap();
     libro.registrar_alcanzables(inv_vacio);
@@ -264,7 +264,7 @@ fn inventario_caducado_sin_alcanzables_degrada_todas_las_clases() {
                 &fk,
             )
             .unwrap(),
-        );
+        ).unwrap();
     }
     libro2.registrar_hecho(
         HechoFirmadoLibro::firmar(
@@ -279,7 +279,7 @@ fn inventario_caducado_sin_alcanzables_degrada_todas_las_clases() {
             &fk,
         )
         .unwrap(),
-    );
+    ).unwrap();
     let inv_cad = InventarioAlcanzables::firmar(sistema(), BTreeSet::new(), 1, 1, 0, &fk).unwrap();
     libro2.registrar_alcanzables(inv_cad);
     let eval = libro2.evaluar(&sistema(), ClaseEfecto::Ef2, tarde);
@@ -417,7 +417,7 @@ fn gateway_ef3_bloqueado_por_control_insuficiente_tras_ef9() {
             &fk,
         )
         .unwrap(),
-    );
+    ).unwrap();
     let inv = inv_firmado(BTreeSet::from([ClaseEfecto::Ef3]), &fk, false, 0);
     libro.registrar_alcanzables(inv);
     assert!(!libro_suficiente_c3(
@@ -614,7 +614,7 @@ fn sin_interfaz_de_elevacion() {
             &fk,
         )
         .unwrap(),
-    );
+    ).unwrap();
     libro.registrar_alcanzables(inv_firmado(BTreeSet::from([ClaseEfecto::Ef3]), &fk, false, 0));
     assert_eq!(
         libro.evaluar(&sistema(), ClaseEfecto::Ef3, 0).nivel_vigente,

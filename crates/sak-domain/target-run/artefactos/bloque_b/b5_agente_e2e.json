@@ -1,0 +1,7 @@
+{
+  "fase":"B5",
+  "agente_api_key":false,
+  "ejercicio":"RECIBO_OK",
+  "afirmacion_permitida":"Para EF-1 del harness, decision y ejercicio pasan por Kernel; agente sin material; UI no emite.",
+  "afirmacion_no_permitida":"Unica frontera en produccion general / multi-clase / C5_HOST_REAL"
+}

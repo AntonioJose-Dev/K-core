@@ -1,0 +1,6 @@
+﻿C1=PASS (archivos sin commitear: 83)
+C2=PASS
+C3=PASS
+C4=BLOQUEADO-CUSTODIA (handle inesperado: )
+C5=PASS (autorizacion del operador)
+

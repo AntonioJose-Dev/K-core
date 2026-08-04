@@ -7,6 +7,7 @@
 mod activacion;
 mod conformidad;
 mod corpus;
+mod corpus_durable;
 mod firmantes;
 mod propuesta;
 
@@ -18,6 +19,11 @@ pub use conformidad::{
     CambioDecision, DiffDecisiones, ErrorDiff, ReconocimientoCambio,
 };
 pub use corpus::{EstadoPropuesta, EtiquetaGob, GobernanzaCorpus, VersionCorpus};
+pub use corpus_durable::{
+    cargar_gobernanza_desde_almacen, clave_almacen_paquete, conservar_paquete_activado,
+    exigir_cita_o_suspender, reafirmar_activo_en_historial, resolver_cita_paquete,
+    ErrorCorpusDurable,
+};
 pub use firmantes::{
     verificar_doble_firma, ErrorFirmas, FirmaPaquete, FirmanteGobernanza, RegistroFirmantesGob,
     RolFirmante,

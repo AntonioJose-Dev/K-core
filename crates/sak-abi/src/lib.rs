@@ -171,8 +171,9 @@ pub extern "C" fn sak_decidir(
     SAK_OK
 }
 
-/// Ejercer capacidad. En el Bloque 1 la verificación de vigencia/época/unicidad
-/// es del Bloque 5: la superficie existe; el cuerpo no concede autoridad.
+/// Ejercer capacidad. Bloque B: cuerpo real vive en `sak-domain::sujeto` (host
+/// con EstadoOps). Esta superficie ABI permanece N/D hasta registro de host;
+/// el harness B5 valida la misma cadena vía dominio in-process (E.1).
 #[no_mangle]
 pub extern "C" fn sak_ejercer(
     _capacidad: *const u8,

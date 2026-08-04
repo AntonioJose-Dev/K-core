@@ -51,6 +51,18 @@ impl NivelControl {
             other
         }
     }
+
+    pub fn desde_u8(n: u8) -> Option<Self> {
+        match n {
+            0 => Some(NivelControl::C0),
+            1 => Some(NivelControl::C1),
+            2 => Some(NivelControl::C2),
+            3 => Some(NivelControl::C3),
+            4 => Some(NivelControl::C4),
+            5 => Some(NivelControl::C5),
+            _ => None,
+        }
+    }
 }
 
 impl fmt::Display for NivelControl {

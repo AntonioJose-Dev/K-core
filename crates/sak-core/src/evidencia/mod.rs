@@ -1,5 +1,6 @@
 //! Evidencia durable y encadenada (§M 3 + §M 11): INV-07, INV-15, J, H.12/14/15.
 
+mod almacen_disco;
 mod camaleon;
 mod estado;
 mod expediente;
@@ -8,6 +9,7 @@ mod merkle;
 mod registro;
 mod verificar;
 
+pub use almacen_disco::AlmacenDiscoLocal;
 pub use camaleon::{
     derivar_kek_pii, redactar_hoja, CustodiaTrampilla, ErrorCamaleon, HojaCamaleon, IdTitular,
     RegistroRedaccion, DECISION_CRIPTO_PII_V1, DOMINIO_PII_KEK_V1,

@@ -77,7 +77,46 @@ pub struct RespuestaModelo {
 }
 
 /// Contrato de ejecución delegada. Solo el Kernel/gateway invoca esto.
+///
+/// Contexto de capacidad (2C): el Gateway instala datos de `cap` verificada
+/// antes de `inferir_delegado`. Default no-op (p.ej. [`ProveedorSimulado`]).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContextoEjercicioEf1 {
+    pub cap_id: [u8; LONGITUD_HASH_PAQUETE],
+    pub digest: [u8; LONGITUD_HASH_PAQUETE],
+    pub epoca: u64,
+    pub vive_hasta: u64,
+    pub ahora: u64,
+}
+
+thread_local! {
+    static CTX_EJERCICIO_EF1: std::cell::RefCell<Option<ContextoEjercicioEf1>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Instala contexto para la siguiente llamada delegada (Gateway → proveedor).
+pub fn instalar_contexto_ejercicio_ef1(ctx: ContextoEjercicioEf1) {
+    CTX_EJERCICIO_EF1.with(|c| {
+        *c.borrow_mut() = Some(ctx);
+    });
+}
+
+/// Toma el contexto instalado (una vez).
+pub fn tomar_contexto_ejercicio_ef1() -> Option<ContextoEjercicioEf1> {
+    CTX_EJERCICIO_EF1.with(|c| c.borrow_mut().take())
+}
+
+pub fn limpiar_contexto_ejercicio_ef1() {
+    CTX_EJERCICIO_EF1.with(|c| {
+        *c.borrow_mut() = None;
+    });
+}
+
 pub trait ProveedorModelo {
+    /// Hook 2C: recibe cap.id / época / TTL tras verificación del Gateway.
+    /// Default: no-op (ProveedorSimulado idéntico).
+    fn preparar_contexto_ejercicio(&mut self, _ctx: &ContextoEjercicioEf1) {}
+
     fn inferir_delegado(
         &mut self,
         solicitud: &SolicitudInferencia,

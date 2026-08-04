@@ -1,0 +1,4 @@
+﻿clave_anterior=REVOCADA (confirmada por operador)
+clave_nueva=CUSTODIA_PROCESO (SAK_PILOTO_NVIDIA_KEY en entorno del proceso)
+evidencia_revocacion=Panel NVIDIA build.nvidia.com, confirmada por operador antes de ejecucion
+exposicion_secreto=NO (clave no aparece en este archivo ni en ningun artefacto)

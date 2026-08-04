@@ -10,6 +10,7 @@ mod confinamiento;
 mod evaluador_ef9;
 mod hecho;
 mod libro_ctrl;
+mod libro_durable;
 mod minimo;
 mod multiparte;
 mod nivel;
@@ -35,6 +36,9 @@ pub use hecho::{
     antigüedad_maxima, HechoFirmadoLibro, InventarioAlcanzables, ProductorHecho, TipoHecho,
 };
 pub use libro_ctrl::{ErrorLibro, LibroControl, ParSistemaClase};
+pub use libro_durable::{
+    cargar_libro_desde_almacen, conservar_libro, clave_almacen_libro, ErrorLibroDurable,
+};
 pub use minimo::minimo_exigido;
 pub use multiparte::{
     aceptar_certificado, emitir_certificado_vista, quorum_dos_tercios_mas_uno,

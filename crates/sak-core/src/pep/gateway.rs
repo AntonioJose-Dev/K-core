@@ -10,7 +10,7 @@ use crate::evidencia::{
 };
 use crate::identidad::IdSistema;
 use crate::pep::incidente::{IncidenteMediacion, TipoIncidente};
-use crate::pep::proveedor::ProveedorModelo;
+use crate::pep::proveedor::{ContextoEjercicioEf1, ProveedorModelo};
 use crate::pep::solicitud::{
     canon_condiciones, digest_solicitud_inferencia, CondicionesAplicadas, SolicitudCruda,
     SolicitudInferencia,
@@ -530,7 +530,21 @@ impl GatewayModelos {
             ResultadoVerificacion::Permitido { antiguedad_vista_ms } => antiguedad_vista_ms,
         };
 
-        let resp = match proveedor.inferir_delegado(solicitud, cap.digest_efecto()) {
+        let resp = {
+            let ctx = ContextoEjercicioEf1 {
+                cap_id: *cap.id().as_bytes(),
+                digest: *cap.digest_efecto(),
+                epoca: cap.epoca(),
+                vive_hasta: cap.vive_hasta(),
+                ahora: ticks,
+            };
+            crate::pep::proveedor::instalar_contexto_ejercicio_ef1(ctx.clone());
+            proveedor.preparar_contexto_ejercicio(&ctx);
+            let r = proveedor.inferir_delegado(solicitud, cap.digest_efecto());
+            crate::pep::proveedor::limpiar_contexto_ejercicio_ef1();
+            r
+        };
+        let resp = match resp {
             Ok(r) => r,
             Err(e) => {
                 return self.denegar(

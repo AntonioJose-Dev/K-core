@@ -114,11 +114,27 @@ pub fn resolver_puerta_h2_h3(
 
     // H.3 — pasaporte vigente, firmado y versionado.
     match registro.cargar_pasaporte_vigente(&identidad, peticion.instante_epoch_dias) {
-        Ok(pasaporte) => ResultadoPuerta::Permitido(ContextoAutorizado {
-            identidad,
-            pasaporte,
-            efecto: peticion.efecto.clone(),
-        }),
+        Ok(pasaporte) => {
+            // Vínculo certificado–pasaporte (INV-05 / H.2 local).
+            if ca
+                .verificar_certificado(
+                    &peticion.artefacto,
+                    pasaporte.pasaporte(),
+                    peticion.instante_epoch_dias,
+                )
+                .is_err()
+            {
+                return ResultadoPuerta::Denegado {
+                    codigo: CodigoPuerta::Identidad,
+                    hallazgo: None,
+                };
+            }
+            ResultadoPuerta::Permitido(ContextoAutorizado {
+                identidad,
+                pasaporte,
+                efecto: peticion.efecto.clone(),
+            })
+        }
         Err(motivo) => ResultadoPuerta::Denegado {
             codigo: CodigoPuerta::SinRegistro,
             hallazgo: Some(HallazgoSistemaNoRegistrado {

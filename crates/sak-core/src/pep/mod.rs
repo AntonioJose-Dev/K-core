@@ -40,6 +40,8 @@ mod gateway_publicacion;
 mod incidente;
 mod modulo_fisico;
 mod proveedor;
+mod proveedor_loopback;
+mod proveedor_nvidia_ef1;
 mod solicitud;
 mod solicitud_comunicacion;
 mod solicitud_consumo;
@@ -124,7 +126,20 @@ pub use modulo_fisico::{
     ModuloFisicoInterpuesto, ResultadoFisico,
 };
 pub use proveedor::{
-    CredencialProveedor, ErrorEgreso, ErrorProveedor, ProveedorModelo, ProveedorSimulado,
+    instalar_contexto_ejercicio_ef1, limpiar_contexto_ejercicio_ef1, tomar_contexto_ejercicio_ef1,
+    ContextoEjercicioEf1, CredencialProveedor, ErrorEgreso, ErrorProveedor, ProveedorModelo,
+    ProveedorSimulado, RespuestaModelo,
+};
+pub use proveedor_loopback::{
+    atender_peticion_mock, construir_peticion_con_nonce, emitir_ticket_bytes, enviar_linea_mock,
+    enviar_linea_pipe, generar_clave_efimera, generar_nonce_aleatorio, intentar_abrir_pipe,
+    llamada_directa_sin_sello, parse_clave_hex, pipe_desde_env, sello_protocolo_antiguo,
+    verificar_sello_con_nonce, verificar_ticket_v2, MockEf1Loopback, ProveedorLoopbackEf1,
+    ENV_LOOPBACK_PIPE, HANDLE_EF1_PROBE_MEDIADO,
+};
+pub use proveedor_nvidia_ef1::{
+    ultimo_diagnostico_nvidia, ClaseFallo, DiagnosticoProvider, ProveedorNvidiaEf1,
+    HANDLE_EF1_PILOTO_NVIDIA, ENV_NVIDIA_KEY,
 };
 pub use solicitud::{
     canon_condiciones, digest_solicitud_inferencia, ClaseEfecto, CondicionesAplicadas,

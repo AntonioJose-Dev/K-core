@@ -1,0 +1,7 @@
+{
+  "fase":"B2",
+  "mango_emitido":true,
+  "cap.emitir":"DENY_FIJO",
+  "afirmacion_permitida":"Emisor=Kernel; IPC cap.emitir denegado",
+  "afirmacion_no_permitida":"Llamada PEP real (B3)"
+}

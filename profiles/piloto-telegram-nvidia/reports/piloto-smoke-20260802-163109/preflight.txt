@@ -1,0 +1,5 @@
+﻿C1=PASS (archivos sin commitear: 83)
+C2=PASS
+C3=PASS
+C4=PENDIENTE_EJECUCION
+C5=PASS (autorizacion del operador)

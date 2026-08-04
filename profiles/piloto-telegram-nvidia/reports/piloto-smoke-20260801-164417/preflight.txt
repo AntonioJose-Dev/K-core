@@ -1,0 +1,6 @@
+﻿C1=PASS (archivos sin commitear: 83)
+C2=PASS
+C3=PASS
+C4=PASS (custodia=presente: desde_env completo sin error)
+C5=PASS (autorizacion del operador)
+

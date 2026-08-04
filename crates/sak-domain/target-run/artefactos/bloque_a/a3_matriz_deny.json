@@ -1,0 +1,22 @@
+{
+  "fase": "A3",
+  "filas": [
+    {"caso":"alta_sin_firma","codigo":"SIN_FIRMA","esperado":"SIN_FIRMA"},
+    {"caso":"alta_api_key","codigo":"SECRETO_PROHIBIDO","esperado":"SECRETO_PROHIBIDO"},
+    {"caso":"autorizar_efectos","codigo":"INTENTO_AUTORIZAR","esperado":"INTENTO_AUTORIZAR"},
+    {"caso":"completitud","codigo":"COMPLETITUD_PROHIBIDA","esperado":"COMPLETITUD_PROHIBIDA"},
+    {"caso":"deny_fijo:libro.elevar","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"deny_fijo:cap.emitir","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"deny_fijo:cus.reveal","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"deny_fijo:cus.export_raiz","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"deny_fijo:conceder_ef12","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"deny_fijo:net.bind_public","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"deny_fijo:telemetry.any","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"obs.diagnostico.decidir","codigo":"NO_OBSERVAR","esperado":"DENY"},
+    {"caso":"obs.diagnostico.ejercer","codigo":"NO_OBSERVAR","esperado":"DENY"},
+    {"caso":"cus.reveal","codigo":"DENY_FIJO","esperado":"DENY"},
+    {"caso":"telemetry.ping","codigo":"DENY_FIJO","esperado":"DENY"}
+  ],
+  "afirmacion_permitida": "Atajos de autoridad cerrados en IPC (DENY fijo + denegaciones Conectar/Custodiar).",
+  "afirmacion_no_permitida": "Que el proceso agente no pueda fugarse por SDK directo fuera del canal."
+}

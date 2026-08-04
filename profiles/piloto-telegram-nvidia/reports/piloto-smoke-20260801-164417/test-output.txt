@@ -1,0 +1,21 @@
+﻿
+running 1 test
+test smoke_nvidia_ef1_cadena_completa has been running for over 60 seconds
+===SMOKE_NVIDIA_EF1===
+handle=ef1-piloto-nvidia
+veredicto=ALLOW
+codigo_decidir=ALLOW_EMITIDO
+mango=7626195e094cf26e4911d440230fb58002bc8b835b508e399da066d00b594df1ba74d6dcb43a6cbd2eb0b669b75104a0
+ok=false
+codigo_ejercer=Evidencia("fallo interno del proveedor")
+recibo_digest=NONE
+diag_key_present=true
+diag_key_len=70
+diag_fase=http_send
+diag_clase=Timeout
+diag_elapsed_ms=60007
+===FIN_SMOKE===
+test smoke_nvidia_ef1_cadena_completa ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 65.60s
+

@@ -20,6 +20,7 @@ pub enum ErrorEvidencia {
     Firma(String),
     Verificacion(String),
     ReciboSinDecision,
+    CitaPaqueteIrresoluble,
 }
 
 impl fmt::Display for ErrorEvidencia {
@@ -52,6 +53,9 @@ impl fmt::Display for ErrorEvidencia {
             ErrorEvidencia::Verificacion(s) => write!(f, "verificacion: {s}"),
             ErrorEvidencia::ReciboSinDecision => {
                 f.write_str("recibo sin decision previa en la cadena")
+            }
+            ErrorEvidencia::CitaPaqueteIrresoluble => {
+                f.write_str("cita de paquete normativo irresoluble; dominio SUSPENDED")
             }
         }
     }

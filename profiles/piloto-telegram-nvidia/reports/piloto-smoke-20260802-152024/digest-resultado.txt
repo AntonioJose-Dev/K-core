@@ -1,0 +1,3 @@
+﻿digest_resultado=c5a481f5f38dcc2ce8ffb14036b354fc6150f1528413a3342fd37006a117e88faf07d1dba629326023b22b0b99a7760a
+longitud=96
+tipo=SHA-384 (48 bytes hex)

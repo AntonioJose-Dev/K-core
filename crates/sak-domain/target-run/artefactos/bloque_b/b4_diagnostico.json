@@ -1,0 +1,7 @@
+{
+  "fase":"B4",
+  "diagnostico":"OK",
+  "cap.emitir":"DENY",
+  "afirmacion_permitida":"Operador audita misma cadena sujeto",
+  "afirmacion_no_permitida":"Confinamiento host / multi-clase"
+}

@@ -23,6 +23,7 @@ pub enum ErrorLibro {
     ElevacionProhibida,
     RebajaNoInferior,
     ClaseSuspendida,
+    HechoInvalido,
 }
 
 impl fmt::Display for ErrorLibro {
@@ -35,6 +36,9 @@ impl fmt::Display for ErrorLibro {
                 write!(f, "la rebaja manual debe ser estrictamente inferior al calculado")
             }
             ErrorLibro::ClaseSuspendida => write!(f, "clase suspendida por incidente de bypass"),
+            ErrorLibro::HechoInvalido => {
+                write!(f, "hecho con productor, firma o alcance incorrecto")
+            }
         }
     }
 }
@@ -72,8 +76,56 @@ impl LibroControl {
         }
     }
 
-    pub fn registrar_hecho(&mut self, hecho: HechoFirmadoLibro) {
+    pub fn registrar_hecho(&mut self, hecho: HechoFirmadoLibro) -> Result<(), ErrorLibro> {
+        if !hecho.integridad_ok() {
+            return Err(ErrorLibro::HechoInvalido);
+        }
         self.hechos.push(hecho);
+        Ok(())
+    }
+
+    /// Acceso de solo lectura a hechos (persistencia / auditoría).
+    pub fn hechos(&self) -> &[HechoFirmadoLibro] {
+        &self.hechos
+    }
+
+    pub fn techos(&self) -> &HashMap<ParSistemaClase, NivelControl> {
+        &self.techos
+    }
+
+    pub fn suspendidas(&self) -> &BTreeSet<ParSistemaClase> {
+        &self.suspendidas
+    }
+
+    pub fn forzar_c0_set(&self) -> &BTreeSet<ParSistemaClase> {
+        &self.forzar_c0
+    }
+
+    pub fn alcanzables_map(&self) -> &HashMap<String, InventarioAlcanzables> {
+        &self.alcanzables
+    }
+
+    pub fn restaurar_estado(
+        &mut self,
+        hechos: Vec<HechoFirmadoLibro>,
+        alcanzables: HashMap<String, InventarioAlcanzables>,
+        techos: HashMap<ParSistemaClase, NivelControl>,
+        suspendidas: BTreeSet<ParSistemaClase>,
+        forzar_c0: BTreeSet<ParSistemaClase>,
+        historial: Vec<(ParSistemaClase, NivelControl, String, u64)>,
+    ) {
+        self.hechos = hechos
+            .into_iter()
+            .filter(|h| h.integridad_ok())
+            .collect();
+        self.alcanzables = alcanzables
+            .into_iter()
+            .filter(|(_, inv)| inv.integridad_ok())
+            .collect();
+        self.techos = techos;
+        self.suspendidas = suspendidas;
+        self.forzar_c0 = forzar_c0;
+        self.historial = historial;
     }
 
     pub fn registrar_alcanzables(&mut self, inv: InventarioAlcanzables) {

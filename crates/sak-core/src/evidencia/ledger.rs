@@ -90,6 +90,19 @@ impl<A: AlmacenEvidencia> LedgerEvidencia<A> {
         self.epoca
     }
 
+    pub fn suelo_epoca(&self) -> u64 {
+        self.suelo_epoca
+    }
+
+    /// Lectura de registros ya comprometidos (familia Observar / export).
+    pub fn registros(&self) -> &[RegistroFirmado] {
+        &self.registros
+    }
+
+    pub fn checkpoints(&self) -> &[CheckpointEpoca] {
+        &self.checkpoints
+    }
+
     pub fn pk_autoridad(&self) -> &[u8] {
         &self.autoridad.public
     }
@@ -107,6 +120,19 @@ impl<A: AlmacenEvidencia> LedgerEvidencia<A> {
 
     fn suspender(&mut self) {
         self.estado = EstadoDominio::Suspended;
+    }
+
+    /// INV-03: cita de paquete activado irresoluble ⇒ SUSPENDED.
+    pub fn suspender_por_cita_irresoluble(&mut self) {
+        self.suspender();
+    }
+
+    pub fn almacen(&self) -> &A {
+        &self.almacen
+    }
+
+    pub fn almacen_mut(&mut self) -> &mut A {
+        &mut self.almacen
     }
 
     fn exigir_operative(&self) -> Result<(), ErrorEvidencia> {

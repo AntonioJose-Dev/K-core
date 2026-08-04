@@ -1,0 +1,6 @@
+﻿V1=PASS (RespuestaModelo contiene solo digest_resultado, referencia_minima, digest_parametros_ejecutados - sin campo de texto)
+V2=PASS (run-smoke.ps1 no persiste stdout/stderr HTTP ni archivos temporales)
+V3=choices=0, message=0, content=0 (0=PASS)
+V4=id=0, object=0 (0=PASS)
+V5=referencia_minima longitud=96 caracteres (96=PASS)
+V6=confirmado (digest-resultado.txt verificado)

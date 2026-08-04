@@ -1,0 +1,17 @@
+[package]
+name = "sak-ops-ui"
+description = "UI operador local no autoritativa (D4) — solo consume obs.*"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+name = "sak_ops_ui"
+path = "src/lib.rs"
+
+[[bin]]
+name = "sak-ops-ui"
+path = "src/main.rs"
+
+[dependencies]
+sak-domain = { path = "../sak-domain" }

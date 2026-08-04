@@ -47,6 +47,24 @@ impl ClaseEfecto {
             ClaseEfecto::Ef12 => "EF-12",
         }
     }
+
+    pub fn desde_token(s: &str) -> Option<Self> {
+        match s {
+            "EF-1" => Some(ClaseEfecto::Ef1),
+            "EF-2" => Some(ClaseEfecto::Ef2),
+            "EF-3" => Some(ClaseEfecto::Ef3),
+            "EF-4" => Some(ClaseEfecto::Ef4),
+            "EF-5" => Some(ClaseEfecto::Ef5),
+            "EF-6" => Some(ClaseEfecto::Ef6),
+            "EF-7" => Some(ClaseEfecto::Ef7),
+            "EF-8" => Some(ClaseEfecto::Ef8),
+            "EF-9" => Some(ClaseEfecto::Ef9),
+            "EF-10" => Some(ClaseEfecto::Ef10),
+            "EF-11" => Some(ClaseEfecto::Ef11),
+            "EF-12" => Some(ClaseEfecto::Ef12),
+            _ => None,
+        }
+    }
 }
 
 impl fmt::Display for ClaseEfecto {
