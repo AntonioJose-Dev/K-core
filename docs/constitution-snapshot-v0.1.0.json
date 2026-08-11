@@ -61,5 +61,27 @@
     {"id": "A-04.11", "status": "CERRADO"},
     {"id": "A-04.12", "status": "CERRADO"}
   ],
+  "invalidation_rule": {
+    "triggers": [
+      "Edición de contenido en A-00 a A-07 que cambie su content_hash",
+      "Adición, renumeración o eliminación de un invariante A-04.x o soberanía SOV-x",
+      "Cambio en dependency_matrix (nueva relación o eliminación de una existente)",
+      "Cambio de estado en constitutional_state_table fuera de este proceso de gates",
+      "Adición de un nuevo documento constitucional (A-08 en adelante)"
+    ],
+    "cascade_policy": "Los gates 1-13 dependen transitivamente del Gate 0. Una invalidación general reabre todos los gates dependientes según su dependency_matrix declarada. Una invalidación restringida a un solo documento (ej. solo A-06) reabre únicamente los gates que declaren esa dependencia específica.",
+    "revalidation_procedure": [
+      "1. Recalcular content_hash del documento afectado",
+      "2. Comparar contra el hash registrado en este snapshot",
+      "3. Si difiere, marcar snapshot_hash como OBSOLETO",
+      "4. Generar diff explícito (documento, hash anterior, hash nuevo)",
+      "5. Identificar gates dependientes según dependency_matrix",
+      "6. Marcar esos gates como REABIERTO en la página G de Notion",
+      "7. Generar nuevo ConstitutionSnapshotV1 con versión incrementada",
+      "8. Nueva época",
+      "9. Commit en GitHub con referencia al snapshot_hash anterior"
+    ],
+    "reopen_rule": "Ningún gate marcado como REABIERTO puede volver a CERRADO sin repetir su prueba mínima original contra el nuevo snapshot vigente."
+  },
   "snapshot_hash": "421f2d6712f124b279c503320619723e84ed67403de6ff37bb6868d6c7f9cb82"
 }
