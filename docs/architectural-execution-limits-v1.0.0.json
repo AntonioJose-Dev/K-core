@@ -1,0 +1,64 @@
+{
+  "architectural_execution_limits_id": "AEL-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T14:31:00Z",
+  "source_specs": ["A-06", "A-04"],
+  "constitutional_limits": [
+    "K-Core conserva la autoridad soberana local",
+    "Ninguna capa, subsistema, interfaz, bus o adaptador puede crear autoridad paralela",
+    "Las capas de decision, verificacion, especificacion y persistencia permanecen separadas por diseño",
+    "Todo subsistema autoritativo queda subordinado a las invariantes y decisiones de K-Core",
+    "K-Net es opcional y no puede prevalecer sobre K-Core",
+    "K-Evid puede recibir, preservar y verificar evidencia, pero no emite identidad, politica, grants ni decisiones soberanas",
+    "Los Adaptadores transportan, presentan o ejecutan acciones mediadas, pero no adquieren autoridad",
+    "Los mappings regulatorios no modifican la autoridad constitucional ni convierten el runtime en interprete juridico"
+  ],
+  "execution_invariants": [
+    {"id": "A-04.1", "name": "Mediacion soberana", "status": "CERRADO", "evidence": "Pruebas de rutas y ausencia de bypass"},
+    {"id": "A-04.2", "name": "Agnosticismo de modelo", "status": "CERRADO", "evidence": "Pruebas de aislamiento y mediacion"},
+    {"id": "A-04.3", "name": "Default conservador", "status": "CERRADO", "evidence": "Tests de DENY ante UNDEFINED"},
+    {"id": "A-04.4", "name": "Sellado de efectos protegidos", "status": "CERRADO", "evidence": "Verificacion de Grant y SealedOutput"},
+    {"id": "A-04.5", "name": "Autonomia local", "status": "CERRADO", "evidence": "Tests sin K-Net ni servicios externos"},
+    {"id": "A-04.6", "name": "Unicidad K17", "status": "CERRADO", "evidence": "Modelo TLC reproducible y pruebas de integracion"},
+    {"id": "A-04.7", "name": "Evidencia previa obligatoria", "status": "CERRADO", "evidence": "Tests de commit-before-grant"},
+    {"id": "A-04.8", "name": "Capacidad limitada", "status": "CERRADO", "evidence": "Tests de expiracion, revocacion y scope"},
+    {"id": "A-04.9", "name": "Cierre ante perdida de supuestos", "status": "CERRADO", "evidence": "Pruebas de transicion a estado seguro"},
+    {"id": "A-04.10", "name": "Ley como dato firmado", "status": "CERRADO", "evidence": "Verificacion de separacion entre norma y codigo"},
+    {"id": "A-04.11", "name": "Verificabilidad externa", "status": "CERRADO", "evidence": "Evidencia reproducible por tercero"},
+    {"id": "A-04.12", "name": "No interpretacion juridica por el Kernel", "status": "CERRADO", "evidence": "Tests de separacion de roles"}
+  ],
+  "constitutional_principle": "Ningun input —humano, modelo, adaptador, politica o mensaje de red— puede producir un efecto soberano sin una decision local de K-Core",
+  "derived_requirements": [
+    "Toda decision debe referenciar el hash del paquete normativo y las normas aplicadas",
+    "Ningun sistema de IA obtiene autoridad sin pasaporte firmado y vigente",
+    "Los puntos de aplicacion ejecutan decisiones, pero no crean autoridad",
+    "La evidencia de la decision debe comprometerse antes de que exista la capacidad",
+    "Las capacidades son acotadas, expirables, revocables y, cuando corresponda, de un solo uso",
+    "La perdida de un supuesto critico elimina la autorizacion de la clase afectada",
+    "La ley entra como dato firmado; no como logica jurisdiccional incrustada en el nucleo autoritativo",
+    "La evidencia debe poder verificarse externamente sin confiar en el operador",
+    "El Kernel no interpreta ni certifica juridicamente; procesa datos normativos aprobados",
+    "La perdida de una condicion critica fuerza el estado seguro correspondiente"
+  ],
+  "supervision_invariants": [
+    "Cuando una decision requiera intervencion humana, el quorum exigido por la norma o la politica vigente es obligatorio y debe verificarse antes de que K-Core admita la resolucion",
+    "Un quorum incompleto no autoriza nada",
+    "La expiracion del plazo no produce autorizacion tacita",
+    "La ausencia, demora, rechazo o invalidez de una firma debe quedar registrada y conducir a la transicion normativa correspondiente",
+    "La intervencion humana no transfiere autoridad general ni permite eludir identidad, politica, grants, mediacion, trazabilidad o decision final de K-Core"
+  ],
+  "implementation_distribution": {
+    "B_K-Core": "mediacion, grants, estados, identidad y ejecucion local",
+    "C_K-Spec": "esquemas, perfiles normativos, determinismo sobre snapshots explicitos y niveles de control",
+    "D_K-Net": "federacion opcional y coordinacion sin autoridad local",
+    "E_K-Evid": "TLC, pruebas formales, verificabilidad externa y evidencia de cumplimiento",
+    "F_Adaptadores": "superficies no soberanas y ejecucion mediada"
+  },
+  "invalidation_rule": {
+    "triggers": ["Cambio en A-06 o A-04", "Nueva invariante que afecte mediacion, soberania, separacion, limites o ejecucion", "Invalidacion Gate 0, Gate 1, Gate 2, Gate 3, Gate 4 o Gate 5"],
+    "cascade_policy": "Gates 7-13 dependen del Gate 6",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "architectural_execution_limits_hash": "9222d1fafb2d4a318280c51fb4d2f7abbbc28a1c1870cfd3dd55683c36e5dc33"
+}
