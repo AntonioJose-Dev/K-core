@@ -2,7 +2,7 @@
 //!
 //! Escritura durable write-once en [`AlmacenEvidencia`]. Sin UI/red/API.
 
-use crate::contexto::{ClaseEfecto, IdProductor};
+use crate::contexto::{ClaseEfecto, HechoConValor, IdProductor, ValorHecho};
 use crate::decision::{HashPaqueteNormativo, LONGITUD_HASH_PAQUETE, Veredicto};
 use crate::evidencia::{AlmacenEvidencia, ErrorEvidencia, LedgerEvidencia};
 use crate::gobernanza::conformidad::ReconocimientoCambio;
@@ -191,6 +191,13 @@ fn decode_predicado(r: &mut Lector<'_>) -> Result<Predicado, ErrorCorpusDurable>
             let p = IdProductor::nuevo(leer_str_u16(r)?).map_err(|_| ErrorCorpusDurable::Corrupto)?;
             Ok(Predicado::HechoVigente(p))
         }
+        8 => {
+            let p = IdProductor::nuevo(leer_str_u16(r)?).map_err(|_| ErrorCorpusDurable::Corrupto)?;
+            let token_str = leer_str_u16(r)?;
+            let valor = ValorHecho::token(token_str).map_err(|_| ErrorCorpusDurable::Corrupto)?;
+            let hcv = HechoConValor::nuevo(p, valor);
+            Ok(Predicado::HechoConValor(hcv))
+        }
         4 => {
             let n = r.u32()? as usize;
             let mut xs = Vec::with_capacity(n);
@@ -233,6 +240,13 @@ fn clase_efecto(v: u8) -> Result<ClaseEfecto, ErrorCorpusDurable> {
         12 => Ok(ClaseEfecto::Ef12),
         _ => Err(ErrorCorpusDurable::Corrupto),
     }
+}
+
+
+/// Decodifica un `Predicado` desde bytes en formato canonico (para tests).
+pub fn decode_predicado_from_bytes(bytes: &[u8]) -> Result<Predicado, ErrorCorpusDurable> {
+    let mut r = Lector::new(bytes);
+    decode_predicado(&mut r)
 }
 
 fn leer_str_u16(r: &mut Lector<'_>) -> Result<String, ErrorCorpusDurable> {

@@ -179,7 +179,8 @@ impl FronteraSujeto {
         }
 
         let efecto = EfectoTipado::nuevo(clase, digest_parametros);
-        let ctx = Contexto::nuevo(efecto, vec![]);
+        let hash_peticion = [0u8; LONGITUD_HASH_PAQUETE];
+        let ctx = Contexto::nuevo(efecto, vec![], hash_peticion);
         let perfil = self.perfil_allow(clase)?;
         let dc = decidir_con_libro(
             &ctx,

@@ -140,7 +140,8 @@ pub extern "C" fn sak_decidir(
         return SAK_ERR_ENTRADA;
     };
     let efecto = EfectoTipado::nuevo(clase, ent.digest_parametros);
-    let ctx = Contexto::nuevo(efecto, vec![]);
+    let hash_peticion = ent.hash_paquete;
+    let ctx = Contexto::nuevo(efecto, vec![], hash_peticion);
     let hash = HashPaqueteNormativo::desde_bytes(ent.hash_paquete);
 
     let perfil = if ent.tiene_norma == 0 {

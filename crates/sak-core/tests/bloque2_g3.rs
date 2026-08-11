@@ -1,7 +1,7 @@
 //! Vectores del Bloque 2: G.3, R1–R8 y cierre conservador.
 
 use sak_core::contexto::{
-    ClaseEfecto, Contexto, EfectoTipado, FirmaProductor, HechoFirmado, IdProductor,
+    ClaseEfecto, Contexto, EfectoTipado, FirmaProductor, HechoFirmado, IdProductor, ValorHecho,
 };
 use sak_core::decision::{CodigoRazon, Decision, MotivoInercia, Veredicto, LONGITUD_HASH_PAQUETE};
 use sak_core::motor::decidir_paquete;
@@ -70,10 +70,12 @@ fn paquete(normas: Vec<Norma>) -> PaqueteNormativo {
 }
 
 fn ctx(clase: ClaseEfecto, instante: u32) -> Contexto {
+    let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
     Contexto::con_instante(
         EfectoTipado::nuevo(clase, [1u8; LONGITUD_HASH_PAQUETE]),
         vec![],
         instante,
+        hash_peticion,
     )
 }
 
@@ -313,18 +315,23 @@ fn evidencia_presente_permite() {
         productor: prod.clone(),
         antiguedad_maxima_segundos: 100,
     }];
+    let token = ValorHecho::token("token-hecho-ok").unwrap();
+    let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
     let hecho = HechoFirmado::nuevo(
         prod,
+        token,
         [2u8; LONGITUD_HASH_PAQUETE],
         FirmaProductor::nueva(vec![1, 2, 3]).unwrap(),
         10,
         100,
+        hash_peticion,
     );
     let pkg = paquete(vec![Norma::cargar(b).unwrap()]);
     let ctx = Contexto::con_instante(
         EfectoTipado::nuevo(ClaseEfecto::Ef1, [1u8; LONGITUD_HASH_PAQUETE]),
         vec![hecho],
         20_000,
+        hash_peticion,
     );
     let d = decidir_paquete(&ctx, &pkg);
     assert!(matches!(d, Decision::Permitida(_)));

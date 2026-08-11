@@ -1,12 +1,19 @@
 //! Suite criptográfica J.6 / L-07 (fragmento del Bloque 3).
 //!
+//! Perfil declarable (post-cuántico):
 //! - SHA-384 con separación de dominio
 //! - ML-DSA-87: autoridad, evidencia y paquetes
 //! - SLH-DSA-SHA2-128s: cofirma de checkpoints (base hash; J.6)
 //!
+//! Perfil default v1 (B-01):
+//! - SHA-256, HMAC-SHA-256, AES-256-GCM, HKDF-SHA-256, Ed25519
+//!   (ver módulo `default_v1`).
+//!
 //! Parámetro SLH elegido: SHA2-128s (hash-based). Suficiente para cofirma de
 //! archivo en Bloque 3; un perfil de categoría 5 (p.ej. SHA2-256s) puede
 //! sustituirse sin cambiar el protocolo de cofirma.
+
+pub mod default_v1;
 use crate::decision::LONGITUD_HASH_PAQUETE;
 use fips204::ml_dsa_87;
 use fips204::traits::{SerDes as MlSerDes, Signer as MlSigner, Verifier as MlVerifier};

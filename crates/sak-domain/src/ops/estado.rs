@@ -248,12 +248,14 @@ fn seed_gobernanza() -> (
 ) {
     use sak_core::contexto::{ClaseEfecto, Contexto, EfectoTipado};
     use sak_core::decision::LONGITUD_HASH_PAQUETE;
+    let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
     let casos = vec![CasoConformidad {
         id: "caso-demo-1".into(),
         contexto: Contexto::con_instante(
             EfectoTipado::nuevo(ClaseEfecto::Ef1, [1u8; LONGITUD_HASH_PAQUETE]),
             vec![],
             20_000,
+            hash_peticion,
         ),
     }];
     let baseline = PaqueteNormativo::cargar(vec![]).expect("paquete vacio cargable");

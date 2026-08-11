@@ -45,9 +45,11 @@ fn perfil_allow(clase: ClaseEfecto) -> PerfilNormativo {
 }
 
 fn ctx(clase: ClaseEfecto) -> Contexto {
+    let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
     Contexto::nuevo(
         EfectoTipado::nuevo(clase, [1u8; LONGITUD_HASH_PAQUETE]),
         vec![],
+        hash_peticion,
     )
 }
 

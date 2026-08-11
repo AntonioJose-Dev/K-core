@@ -48,6 +48,41 @@ Fuente canónica: `K-CORE/KERNEL/MATRIZ MAESTRA CANONICA - Sovereign AI Kernel v
 | Pin de versión exacta en `rust-toolchain.toml` | No se pudo verificar la toolchain instalada (`rustc --version` sin respuesta) | Paso 1, al recuperar el terminal |
 | Compilación de verificación del esqueleto (`cargo check`) | Igual que lo anterior | Antes del paso 2 |
 
+## Deuda técnica preexistente (descubierta en Fase 3)
+
+Los siguientes problemas existen en el repositorio antes de cualquier cambio de Fase 3 y no están relacionados con `id_peticion` ni con el atado a petición. Se registran aquí para que no se pierdan.
+
+### DT-1: Errores de compilación en `gate1_crypto_default_v1.rs`
+
+**Archivo:** `crates/sak-core/tests/gate1_crypto_default_v1.rs`  
+**Líneas:** 15, 34, 107
+
+- **Línea 15:** Array `salt` declarado como `[u8; 22]` pero inicializado con 33 elementos.
+- **Línea 34:** Array `ikm` declarado como `[u8; 64]` pero inicializado con 105 elementos.
+- **Línea 107:** `sha2::Sha256::new()` falla porque el trait `sha2::Digest` no está importado.
+
+**Impacto:** Impide compilar el conjunto completo de tests de `sak-core` con `cargo test -p sak-core`.  
+**Sugerencia:** Revisar si estos tests son necesarios para la entrega actual o si pueden desactivarse temporalmente. Si son necesarios, corregir los tamaños de array y añadir `use sha2::Digest;`.
+
+### DT-2: Crash del compilador en `bloque6_pep_ef1` (STATUS_STACK_BUFFER_OVERRUN)
+
+**Archivo:** `crates/sak-core/tests/bloque6_pep_ef1.rs`  
+**Entorno:** rustc 1.96.0-x86_64-pc-windows-msvc
+
+**Síntoma:** Al compilar el test `bloque6_pep_ef1`, el compilador Rust se cierra con `STATUS_STACK_BUFFER_OVERRUN` (0xc0000409). Esto ocurre incluso sin ejecutar el test, durante la compilación.
+
+** Hipótesis:**  
+1. Bug del compilador (rustc 1.96.0) desencadenado por código complejo en el test.  
+2. Código inseguro en el test (macros complejas, recursión profunda, `unsafe` implícito) que causa stack overflow durante la compilación.
+
+**Impacto:** Impide compilar el conjunto completo de tests de `sak-core` con `cargo test -p sak-core`.  
+**Sugerencia:** Revisar el contenido de `bloque6_pep_ef1.rs` para identificar macros recursivas, traits complejos o patrones que puedan desbordar la pila del compilador. Considerar:  
+- Simplificar el test.  
+- Dividirlo en tests más pequeños.  
+- Reportar el bug a Rust si se reproduce con un caso mínimo ajeno al proyecto.
+
+**Nota:** Estos dos problemas son preexistentes y no están relacionados con los cambios de Fase 3 (atado a petición).
+
 ## Límites declarados del Bloque 1
 
 - `PerfilNormativo` es dato mínimo de prueba; objeto de norma, lenguaje de predicados y precedencia completa: **Bloque 2**.

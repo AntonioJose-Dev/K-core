@@ -7,7 +7,7 @@
 mod activacion;
 mod conformidad;
 mod corpus;
-mod corpus_durable;
+pub mod corpus_durable;
 mod firmantes;
 mod propuesta;
 

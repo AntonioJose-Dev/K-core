@@ -4,7 +4,7 @@
 //! acotada por la profundidad del árbol, con presupuesto de pasos. No es
 //! Turing-completo.
 
-use crate::contexto::{ClaseEfecto, Contexto, IdProductor};
+use crate::contexto::{ClaseEfecto, Contexto, HechoConValor, IdProductor, ValorHecho};
 use crate::decision::Veredicto;
 use crate::presupuesto::Presupuesto;
 use std::fmt;
@@ -30,8 +30,10 @@ pub enum Predicado {
     Fijo(Veredicto),
     /// Igualdad de un campo del contexto con un valor.
     Eq(CampoContexto, Valor),
-    /// Existe un hecho no caducado del productor indicado.
+    /// Existe un hecho no caducado del productor indicado (solo presencia/vigencia).
     HechoVigente(IdProductor),
+    /// Existe un hecho no caducado del productor indicado con el token indicado.
+    HechoConValor(HechoConValor),
     /// Conjunción: todos deben ser verdaderos. Cortocircuito determinista.
     Y(Vec<Predicado>),
     /// Disyunción: el primero verdadero decide. Cortocircuito determinista.
@@ -109,8 +111,21 @@ fn eval_bool_o_veredicto(
             Ok(Salida::Bool(ok))
         }
         Predicado::HechoVigente(prod) => {
+            let hash_peticion = ctx.hash_paquete_normativo();
             let ok = ctx.hechos().iter().any(|h| {
-                h.productor() == prod && !h.caducado()
+                h.productor() == prod
+                    && h.id_peticion() == hash_peticion
+                    && !h.caducado()
+            });
+            Ok(Salida::Bool(ok))
+        }
+        Predicado::HechoConValor(hcv) => {
+            let hash_peticion = ctx.hash_paquete_normativo();
+            let ok = ctx.hechos().iter().any(|h| {
+                h.productor() == hcv.productor()
+                    && h.valor() == hcv.valor()
+                    && h.id_peticion() == hash_peticion
+                    && !h.caducado()
             });
             Ok(Salida::Bool(ok))
         }
@@ -178,6 +193,11 @@ pub fn serializar_canonico(pred: &Predicado, out: &mut Vec<u8>) {
             out.push(3);
             escribir_str(out, p.como_str());
         }
+        Predicado::HechoConValor(hcv) => {
+            out.push(8);
+            escribir_str(out, hcv.productor().como_str());
+            serializar_valor_hecho(hcv.valor(), out);
+        }
         Predicado::Y(xs) => {
             out.push(4);
             out.extend_from_slice(&(xs.len() as u32).to_le_bytes());
@@ -218,6 +238,15 @@ fn serializar_valor(v: &Valor, out: &mut Vec<u8>) {
         Valor::Entero(n) => {
             out.push(2);
             out.extend_from_slice(&n.to_le_bytes());
+        }
+    }
+}
+
+fn serializar_valor_hecho(v: &ValorHecho, out: &mut Vec<u8>) {
+    match v {
+        ValorHecho::Token(s) => {
+            out.push(1);
+            escribir_str(out, s);
         }
     }
 }

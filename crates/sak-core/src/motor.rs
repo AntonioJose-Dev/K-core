@@ -178,7 +178,8 @@ fn traza_de_emergencia(_: ErrorDecision) -> TrazaPrecedencia {
 ///
 /// let hash = HashPaqueteNormativo::desde_bytes([7u8; LONGITUD_HASH_PAQUETE]);
 /// let efecto = EfectoTipado::nuevo(ClaseEfecto::Ef1, [1u8; LONGITUD_HASH_PAQUETE]);
-/// let ctx = Contexto::nuevo(efecto, vec![]);
+/// let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
+/// let ctx = Contexto::nuevo(efecto, vec![], hash_peticion);
 /// let norma = NormaMinima::nueva(
 ///     IdNorma::nueva("N-ALLOW").unwrap(),
 ///     Rango::P2,
@@ -204,7 +205,8 @@ fn traza_de_emergencia(_: ErrorDecision) -> TrazaPrecedencia {
 ///
 /// let hash = HashPaqueteNormativo::desde_bytes([0u8; LONGITUD_HASH_PAQUETE]);
 /// let efecto = EfectoTipado::nuevo(ClaseEfecto::Ef3, [2u8; LONGITUD_HASH_PAQUETE]);
-/// let ctx = Contexto::nuevo(efecto, vec![]);
+/// let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
+/// let ctx = Contexto::nuevo(efecto, vec![], hash_peticion);
 /// let perfil = PerfilNormativo::nuevo(hash, vec![], false);
 ///
 /// let d = decidir(&ctx, &perfil);
@@ -227,7 +229,8 @@ fn traza_de_emergencia(_: ErrorDecision) -> TrazaPrecedencia {
 ///
 /// let hash = HashPaqueteNormativo::desde_bytes([3u8; LONGITUD_HASH_PAQUETE]);
 /// let efecto = EfectoTipado::nuevo(ClaseEfecto::Ef1, [3u8; LONGITUD_HASH_PAQUETE]);
-/// let ctx = Contexto::nuevo(efecto, vec![]);
+/// let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
+/// let ctx = Contexto::nuevo(efecto, vec![], hash_peticion);
 /// let norma = NormaMinima::nueva(
 ///     IdNorma::nueva("N-HEAVY").unwrap(),
 ///     Rango::P0,

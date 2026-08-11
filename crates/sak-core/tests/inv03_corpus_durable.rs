@@ -149,10 +149,12 @@ fn borrador(f: &Fix, id: &str, pred: Predicado) -> BorradorNorma {
 }
 
 fn ctx() -> Contexto {
+    let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
     Contexto::con_instante(
         EfectoTipado::nuevo(ClaseEfecto::Ef1, [1u8; LONGITUD_HASH_PAQUETE]),
         vec![],
         20_000,
+        hash_peticion,
     )
 }
 

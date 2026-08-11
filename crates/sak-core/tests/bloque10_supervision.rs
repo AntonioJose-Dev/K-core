@@ -111,10 +111,12 @@ fn norma_deny() -> Norma {
 }
 
 fn ctx() -> Contexto {
+    let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
     Contexto::con_instante(
         EfectoTipado::nuevo(ClaseEfecto::Ef5, [1u8; LONGITUD_HASH_PAQUETE]),
         vec![],
         20_000,
+        hash_peticion,
     )
 }
 
@@ -323,10 +325,12 @@ fn alteracion_del_contexto_deniega() {
         f.reloj.ahora(),
     )
     .unwrap();
+    let hash_peticion2 = [2u8; LONGITUD_HASH_PAQUETE];
     let ctx2 = Contexto::con_instante(
         EfectoTipado::nuevo(ClaseEfecto::Ef5, [99u8; LONGITUD_HASH_PAQUETE]),
         vec![],
         20_000,
+        hash_peticion2,
     );
     let r = continuar_tras_supervision(
         &s,

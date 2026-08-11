@@ -97,6 +97,51 @@ impl fmt::Display for IdProductor {
     }
 }
 
+/// Valor portado por un hecho. En Fase 2 solo se admite `Token(String)` abierto.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ValorHecho {
+    Token(String),
+}
+
+impl ValorHecho {
+    /// Construye un token validando que no sea vacío tras trim.
+    pub fn token(s: impl Into<String>) -> Result<Self, ErrorContexto> {
+        let s = s.into();
+        if s.trim().is_empty() {
+            return Err(ErrorContexto::TokenVacio);
+        }
+        Ok(ValorHecho::Token(s))
+    }
+
+    pub fn como_str(&self) -> &str {
+        match self {
+            ValorHecho::Token(s) => s,
+        }
+    }
+}
+
+/// Hecho con valor: productor + token. Es el parámetro del predicado
+/// `HechoVigente` (INV-17). No es recursivo: no contiene `Predicado`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HechoConValor {
+    productor: IdProductor,
+    valor: ValorHecho,
+}
+
+impl HechoConValor {
+    pub fn nuevo(productor: IdProductor, valor: ValorHecho) -> Self {
+        HechoConValor { productor, valor }
+    }
+
+    pub fn productor(&self) -> &IdProductor {
+        &self.productor
+    }
+
+    pub fn valor(&self) -> &ValorHecho {
+        &self.valor
+    }
+}
+
 /// Firma de un productor, como dato. No se verifica en el Bloque 1.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FirmaProductor(Vec<u8>);
@@ -115,6 +160,15 @@ impl FirmaProductor {
     }
 }
 
+/// ADVERTENCIA DE SEGURIDAD — Fase 3 (preparatoria, no completa):
+/// `id_peticion` ata el hecho a una petición específica por HASH del paquete
+/// normativo. Esto bloquea el replay entre peticiones DISTINTAS a nivel
+/// estructural. Sin embargo, la firma (`FirmaProductor`) NO se verifica en
+/// este bloque. Un atacante que también controle o adivine `id_peticion`
+/// podría falsificarlo. La protección real contra replay requiere verificación
+/// criptográfica de la firma, planeada para Bloques 3-4. Este mecanismo es
+/// una pieza estructural preparatoria, NO una garantía de seguridad completa.
+///
 /// Hecho firmado inyectado en el contexto. Inmutable.
 ///
 /// El reloj, las mediciones y cualquier valor de entorno llegan por aquí
@@ -124,31 +178,44 @@ impl FirmaProductor {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HechoFirmado {
     productor: IdProductor,
+    valor: ValorHecho,
     digest: [u8; LONGITUD_HASH_PAQUETE],
     firma: FirmaProductor,
     antiguedad_segundos: u64,
     antiguedad_maxima_segundos: u64,
+    /// Hash del paquete normativo de la petición en la que este hecho es válido.
+    /// Ver ADVERTENCIA DE SEGURIDAD arriba: este campo es un atado estructural,
+    /// no una garantía criptográfica.
+    id_peticion: [u8; LONGITUD_HASH_PAQUETE],
 }
 
 impl HechoFirmado {
     pub fn nuevo(
         productor: IdProductor,
+        valor: ValorHecho,
         digest: [u8; LONGITUD_HASH_PAQUETE],
         firma: FirmaProductor,
         antiguedad_segundos: u64,
         antiguedad_maxima_segundos: u64,
+        id_peticion: [u8; LONGITUD_HASH_PAQUETE],
     ) -> Self {
         HechoFirmado {
             productor,
+            valor,
             digest,
             firma,
             antiguedad_segundos,
             antiguedad_maxima_segundos,
+            id_peticion,
         }
     }
 
     pub fn productor(&self) -> &IdProductor {
         &self.productor
+    }
+
+    pub fn valor(&self) -> &ValorHecho {
+        &self.valor
     }
 
     pub fn digest(&self) -> &[u8; LONGITUD_HASH_PAQUETE] {
@@ -165,6 +232,18 @@ impl HechoFirmado {
 
     pub fn antiguedad_maxima_segundos(&self) -> u64 {
         self.antiguedad_maxima_segundos
+    }
+
+    /// Hash del paquete normativo de la petición a la que este hecho está atado.
+    ///
+    /// ADVERTENCIA: este campo ata el hecho a una petición específica por HASH,
+    /// pero la firma (`FirmaProductor`) NO se verifica en este bloque. Un
+    /// atacante que también controle o adivine `id_peticion` podría falsificarlo.
+    /// La protección real contra replay requiere verificación criptográfica de
+    /// la firma, planeada para Bloques 3-4. Este mecanismo es una pieza
+    /// estructural preparatoria, NO una garantía de seguridad completa.
+    pub fn id_peticion(&self) -> &[u8; LONGITUD_HASH_PAQUETE] {
+        &self.id_peticion
     }
 
     /// Hecho caducado según los datos inyectados. Un hecho caducado se evalúa
@@ -208,21 +287,34 @@ impl EfectoTipado {
 ///
 /// `instante_epoch_dias` es el reloj inyectado como dato (INV-14): el motor no
 /// consulta el reloj del sistema. Unidad: días desde 1970-01-01.
+///
+/// `hash_paquete_normativo` es el hash del paquete normativo de la petición
+/// actual. Se usa para verificar el atado estructural de los hechos firmados
+/// (`HechoFirmado::id_peticion`). Ver ADVERTENCIA DE SEGURIDAD en `HechoFirmado`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Contexto {
     efecto: EfectoTipado,
     hechos: Vec<HechoFirmado>,
     instante_epoch_dias: u32,
+    hash_paquete_normativo: [u8; LONGITUD_HASH_PAQUETE],
 }
 
 impl Contexto {
     /// Construye un contexto sin instante explícito (epoch 0). Suficiente para
     /// los vectores del Bloque 1 que no evalúan vigencia.
-    pub fn nuevo(efecto: EfectoTipado, hechos: Vec<HechoFirmado>) -> Self {
+    ///
+    /// `hash_paquete_normativo` debe ser el hash del paquete normativo de la
+    /// petición actual.
+    pub fn nuevo(
+        efecto: EfectoTipado,
+        hechos: Vec<HechoFirmado>,
+        hash_paquete_normativo: [u8; LONGITUD_HASH_PAQUETE],
+    ) -> Self {
         Contexto {
             efecto,
             hechos,
             instante_epoch_dias: 0,
+            hash_paquete_normativo,
         }
     }
 
@@ -230,11 +322,13 @@ impl Contexto {
         efecto: EfectoTipado,
         hechos: Vec<HechoFirmado>,
         instante_epoch_dias: u32,
+        hash_paquete_normativo: [u8; LONGITUD_HASH_PAQUETE],
     ) -> Self {
         Contexto {
             efecto,
             hechos,
             instante_epoch_dias,
+            hash_paquete_normativo,
         }
     }
 
@@ -249,12 +343,22 @@ impl Contexto {
     pub fn instante_epoch_dias(&self) -> u32 {
         self.instante_epoch_dias
     }
+
+    /// Hash del paquete normativo de la petición actual.
+    ///
+    /// ADVERTENCIA: este campo se usa para el atado estructural de hechos
+    /// (`HechoFirmado::id_peticion`), pero NO es una garantía criptográfica.
+    /// La verificación real de la firma del productor queda para Bloques 3-4.
+    pub fn hash_paquete_normativo(&self) -> &[u8; LONGITUD_HASH_PAQUETE] {
+        &self.hash_paquete_normativo
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ErrorContexto {
     IdProductorVacio,
     FirmaVacia,
+    TokenVacio,
 }
 
 impl fmt::Display for ErrorContexto {
@@ -262,6 +366,7 @@ impl fmt::Display for ErrorContexto {
         match self {
             ErrorContexto::IdProductorVacio => f.write_str("identificador de productor vacio"),
             ErrorContexto::FirmaVacia => f.write_str("firma de productor vacia"),
+            ErrorContexto::TokenVacio => f.write_str("token de hecho vacio"),
         }
     }
 }

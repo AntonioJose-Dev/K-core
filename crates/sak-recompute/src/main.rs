@@ -75,6 +75,7 @@ fn casos() -> Vec<Caso> {
             contexto: Contexto::nuevo(
                 EfectoTipado::nuevo(ClaseEfecto::Ef1, dig(1)),
                 vec![],
+                dig(1),
             ),
             perfil: PerfilNormativo::nuevo(h(10), vec![], false),
         },
@@ -83,6 +84,7 @@ fn casos() -> Vec<Caso> {
             contexto: Contexto::nuevo(
                 EfectoTipado::nuevo(ClaseEfecto::Ef1, dig(2)),
                 vec![],
+                dig(2),
             ),
             perfil: PerfilNormativo::nuevo(
                 h(20),
@@ -101,6 +103,7 @@ fn casos() -> Vec<Caso> {
             contexto: Contexto::nuevo(
                 EfectoTipado::nuevo(ClaseEfecto::Ef5, dig(3)),
                 vec![],
+                dig(3),
             ),
             perfil: PerfilNormativo::nuevo(
                 h(30),
@@ -119,6 +122,7 @@ fn casos() -> Vec<Caso> {
             contexto: Contexto::nuevo(
                 EfectoTipado::nuevo(ClaseEfecto::Ef2, dig(4)),
                 vec![],
+                dig(4),
             ),
             perfil: PerfilNormativo::nuevo(
                 h(40),
@@ -140,6 +144,7 @@ fn casos() -> Vec<Caso> {
             contexto: Contexto::nuevo(
                 EfectoTipado::nuevo(ClaseEfecto::Ef6, dig(5)),
                 vec![],
+                dig(5),
             ),
             perfil: PerfilNormativo::nuevo(
                 h(50),
@@ -158,6 +163,7 @@ fn casos() -> Vec<Caso> {
             contexto: Contexto::nuevo(
                 EfectoTipado::nuevo(ClaseEfecto::Ef3, dig(6)),
                 vec![],
+                dig(6),
             ),
             perfil: PerfilNormativo::nuevo(
                 h(60),

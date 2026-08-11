@@ -284,7 +284,8 @@ fn deny_control_insuficiente_sin_evaluar_normas() {
     let _fk = firmante();
     let libro = LibroControl::nuevo(); // C0
     let efecto = EfectoTipado::nuevo(ClaseEfecto::Ef5, [1u8; LONGITUD_HASH_PAQUETE]);
-    let ctx = Contexto::nuevo(efecto, vec![]);
+    let hash_peticion = [1u8; LONGITUD_HASH_PAQUETE];
+    let ctx = Contexto::nuevo(efecto, vec![], hash_peticion);
     let hash = HashPaqueteNormativo::desde_bytes([9u8; LONGITUD_HASH_PAQUETE]);
     let norma = NormaMinima::nueva(
         sak_core::decision::IdNorma::nueva("N-ALLOW").unwrap(),
