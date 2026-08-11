@@ -1,0 +1,97 @@
+{
+  "grant_lifecycle_normative_revocation_id": "GLNR-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T15:40:00Z",
+  "source_specs": ["B-07"],
+  "grant_structure": {
+    "fields": [
+      {"name": "grant_id", "type": "bytes[32]", "rule": "Identificador unico del grant"},
+      {"name": "subject", "type": "Identificador", "rule": "Sujeto al que se concede la autorizacion"},
+      {"name": "executor_binding", "type": "bytes[32]", "rule": "Binding criptografico del ejecutor autorizado"},
+      {"name": "action", "type": "Identificador", "rule": "Accion concreta permitida"},
+      {"name": "resource", "type": "Identificador", "rule": "Recurso concreto sobre el que opera la accion"},
+      {"name": "policy_hash", "type": "bytes[32]", "rule": "Politica que autoriza el grant"},
+      {"name": "context_hash", "type": "bytes[32] / null", "rule": "Contexto adicional, si existe"},
+      {"name": "max_uses", "type": "u32", "rule": "Por defecto 1; no delegable"},
+      {"name": "epoch_range", "type": "(u64, u64)", "rule": "Epoch inicial y final incluidos"},
+      {"name": "issued_epoch", "type": "u64", "rule": "Epoch de emision"},
+      {"name": "issued_counter", "type": "u64", "rule": "Contador persistente de emision dentro del ambito definido"},
+      {"name": "status", "type": "GrantStatus", "rule": "Estado soberano actual"},
+      {"name": "signature", "type": "bytes", "rule": "Firma de K-Core sobre el grant completo"}
+    ],
+    "constraint": "El grant debe limitar sujeto, ejecutor, accion, recurso, politica, contexto, uso y epoch. No puede ampliar la decision que lo origino"
+  },
+  "grant_states": ["ISSUED", "IN_FLIGHT", "CONSUMED", "ABORTED", "REVOKED", "EXPIRED", "RECONCILIATION_REQUIRED"],
+  "grant_transitions": [
+    {"from": "ISSUED", "to": "IN_FLIGHT", "note": "Inicio de ejecucion"},
+    {"from": "IN_FLIGHT", "to": "CONSUMED", "note": "Ejecucion completada con exito"},
+    {"from": "IN_FLIGHT", "to": "ABORTED", "note": "Ejecucion abortada"},
+    {"from": "ISSUED", "to": "REVOKED", "note": "Revocacion antes de ejecucion"},
+    {"from": "IN_FLIGHT", "to": "REVOKED", "note": "Revocacion durante ejecucion"},
+    {"from": "ISSUED", "to": "EXPIRED", "note": "Expiracion por epoch_range"},
+    {"from": "IN_FLIGHT", "to": "EXPIRED", "note": "Expiracion cuando el contrato de ejecucion lo permita y el epoch haya salido del rango"},
+    {"from": "ISSUED", "to": "RECONCILIATION_REQUIRED", "note": "Uso no puede reconciliarse de forma segura"},
+    {"from": "IN_FLIGHT", "to": "RECONCILIATION_REQUIRED", "note": "Uso no puede reconciliarse de forma segura"}
+  ],
+  "terminal_states": {
+    "states": ["CONSUMED", "ABORTED", "REVOKED", "EXPIRED", "RECONCILIATION_REQUIRED"],
+    "consumed_note": "Un grant CONSUMED no se revoca retroactivamente; un incidente posterior se registra como evento separado"
+  },
+  "expiration_consumption": {
+    "primary_condition": "epoch_range es la condicion soberana principal de expiracion",
+    "counters": "Los contadores persistentes permiten evitar reutilizacion entre boots",
+    "monotonic_time": "Los tiempos monotonicos locales solo son validos dentro del boot/epoch al que estan ligados y no sustituyen el rango de epochs",
+    "pre_action_verification": ["Firma", "Identidad", "Binding", "Politica", "Contexto", "Estado", "Epoch", "Scope", "max_uses"],
+    "on_consume": "Al consumir el grant, registra el resultado y lo transforma en CONSUMED o en el estado terminal correspondiente"
+  },
+  "revocation_structure": {
+    "fields": [
+      {"name": "revocation_id", "type": "bytes[32]", "rule": "Identificador unico de la revocacion"},
+      {"name": "grant_id", "type": "bytes[32]", "rule": "Grant afectado"},
+      {"name": "reason_code", "type": "u16", "rule": "Motivo codificado"},
+      {"name": "reason_text", "type": "text / null", "rule": "Descripcion legible opcional"},
+      {"name": "revoked_epoch", "type": "u64", "rule": "Epoch de revocacion"},
+      {"name": "revoked_counter", "type": "u64", "rule": "Contador persistente de revocacion"},
+      {"name": "issuer", "type": "bytes[32]", "rule": "Identidad de K-Core"},
+      {"name": "evidence_ref", "type": "bytes[32] / null", "rule": "Evento de ledger relacionado"},
+      {"name": "signature", "type": "bytes", "rule": "Firma de K-Core sobre la revocacion completa"}
+    ],
+    "issuer_rule": "Solo K-Core puede emitir RevocationV1",
+    "federated_note": "FEDERATED_REVOCATION puede describir el origen de una señal recibida desde K-Net, pero no concede a K-Net capacidad de revocacion directa"
+  },
+  "revocation_reason_codes": {
+    "0x0001": "UNSPECIFIED",
+    "0x0002": "POLICY_VIOLATION",
+    "0x0003": "EXPIRED",
+    "0x0004": "COMPROMISE",
+    "0x0005": "OPERATOR_REQUEST",
+    "0x0006": "FEDERATED_REVOCATION (como motivo de señal, no como autoridad externa)"
+  },
+  "ledger_reconciliation": {
+    "sovereign_events": ["Emision", "Transicion", "Consumo", "Expiracion", "Aborto", "Revocacion", "Reconciliacion"],
+    "registration": "Todos los eventos soberanos se registran en el ledger",
+    "reconciliation_required": "Si K-Core no puede determinar si un grant se consumio, el estado pasa a RECONCILIATION_REQUIRED; no se permite reutilizacion ni decision permisiva por defecto"
+  },
+  "normative_revocation": {
+    "on_policy_revocation": "Cuando una version normativa activa es revocada, las capacidades vivas emitidas bajo ese paquete deben identificarse, invalidarse o reconciliarse conforme a la politica vigente",
+    "no_rewrite": "La revocacion no reescribe las decisiones historicas ni elimina el hash normativo que las gobernaba",
+    "on_reversion": "Una reversio a una version anterior no reactiva automaticamente grants antiguos. Las capacidades deben emitirse o reconciliarse mediante el proceso completo vigente, con identidad, politica, estado, expiracion y evidencia verificables"
+  },
+  "grant_requirements": [
+    "Solo K-Core emite grants limitados en scope, tiempo, epoch y accion (B-07.1)",
+    "Solo K-Core revoca grants; un adaptador no puede ignorar una revocacion efectiva (B-07.2)",
+    "Un grant no se delega a otro adaptador sin un nuevo ciclo de autorizacion de K-Core (B-07.3)",
+    "Todo grant se registra en el ledger como evento soberano (B-07.4)",
+    "Toda revocacion se registra en el ledger como evento soberano (B-07.5)",
+    "GrantV1, RevocationV1 y ReceiptV1 estan definidos internamente (B-07.6)",
+    "GrantV1 v1 es firmado por K-Core y no delegable (B-07.7)",
+    "RevocationV1 contiene identificador, grant afectado, motivo, tiempo/contador, emisor, evidencia y firma (B-07.8)"
+  ],
+  "invalidation_rule": {
+    "triggers": ["Cambio en B-07", "Nuevo campo o estado de grant", "Cambio en transiciones de grant", "Cambio en estructura de revocacion o codigos de motivo", "Cambio en revocacion normativa", "Invalidacion Gate 0, Gate 1, Gate 2, Gate 3, Gate 4, Gate 5, Gate 6, Gate 7, Gate 8 o Gate 9"],
+    "cascade_policy": "Gates 11-13 dependen del Gate 10",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "grant_lifecycle_normative_revocation_hash": "2e252e4f0133d64f6af3ad492f9e975d0c048ca9d6e1472272b2ad88acb09826"
+}
