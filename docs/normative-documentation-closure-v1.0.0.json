@@ -1,0 +1,86 @@
+{
+  "normative_documentation_closure_id": "NDC-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T15:43:00Z",
+  "source_specs": ["C-12"],
+  "function": "C-12 define el proceso formal para proponer, revisar, aprobar, activar, sustituir y revocar cambios normativos y de politica activa. Todo cambio debe ser trazable, firmado, compatible con la Constitucion y activado unicamente por K-Core",
+  "change_record": {
+    "required_fields": ["change_id estable", "change_type", "Politicas afectadas", "Justificacion obligatoria", "Analisis de impacto", "Evaluacion de riesgo", "Proponente identificado", "Timestamps", "Versiones de origen y destino", "Hash de artefactos", "Jurisdiccion", "Alcance", "Dependencias", "Plan de reversio", "Evidencia asociada"],
+    "admissible_types": ["new_policy", "update_policy", "deprecate_policy", "emergency_patch"],
+    "note": "La propuesta no tiene autoridad por si misma y no altera el corpus ni la politica activa"
+  },
+  "normal_flow": [
+    "Propuesta con expediente completo",
+    "Revision tecnica por K-SPEC",
+    "Verificacion de compatibilidad con invariantes constitucionales, corpus y politicas activas",
+    "Revision humana y aprobacion conforme a C-14 cuando la politica o el riesgo lo exijan",
+    "Validacion local de K-Core",
+    "Publicacion de una nueva version firmada y activable",
+    "Activacion en una epoca explicita",
+    "Registro canono de cada fase en E - K-Evid"
+  ],
+  "flow_principles": [
+    "K-SPEC propone, revisa y firma el artefacto normativo",
+    "K-Core decide si es valido, compatible, firmado y activable",
+    "Ningun cambio se activa por silencio, vencimiento de plazo o aprobacion implicita"
+  ],
+  "compatibility_activation": {
+    "verification_targets": ["A - Constitucion", "C-03", "Invariantes aplicables", "Dependencias", "Precedencia", "Superficie afectada"],
+    "constraints": ["No puede desactivar, degradar ni reinterpretar un invariante constitucional", "No puede habilitar EF-12"],
+    "activation_requirements": ["Hash", "Version", "Firma", "Epoca de vigencia", "Snapshot de compatibilidad", "Identidad de los revisores", "Decision local de K-Core"],
+    "preservation": "La politica anterior permanece reconstruible y no se reescribe",
+    "cross_domain": "Los cambios que afecten varios dominios requieren analisis cruzado, evidencia de compatibilidad y responsables identificados por dominio",
+    "adr_note": "Un ADR solo es adicionalmente obligatorio si el cambio afecta una decision arquitectonica; no sustituye el expediente normativo"
+  },
+  "emergency_patch": {
+    "allowed": "Puede usar una ruta acelerada y un conjunto reducido de pasos operativos",
+    "never_omit": ["Identidad", "Firma", "Evidencia", "Compatibilidad constitucional", "Decision local de K-Core", "Registro", "Capacidad de reversio"],
+    "constraint": "La justificacion posterior no convierte en valido un bypass previo",
+    "on_incompatibility": "Si no puede verificarse la compatibilidad minima o no existe una ruta de activacion firmada, el parche no se activa y la salida es DENY o ESCALATE",
+    "post_review": "La revision posterior sirve para auditar y decidir sustitucion o revocacion; no ratifica automaticamente el cambio"
+  },
+  "substitution_revocation_reversion": {
+    "requirements": ["Nueva version", "Autoridad competente", "Causa", "Alcance", "Epoca efectiva", "Plan de impacto", "Eventos firmados"],
+    "reversion_note": "La reversio no borra el cambio historico ni las decisiones tomadas bajo su vigencia; produce una transicion normativa nueva",
+    "deadline_handling": ["Los plazos de revision deben usar un reloj definido y una respuesta explicita al vencimiento", "El vencimiento nunca produce aprobacion", "Si falta revisor, quorum, evidencia o decision valida al vencer el plazo, el proceso se escala o se cierra conservadoramente segun la politica"]
+  },
+  "registry_closure_rule": {
+    "registry_requirement": "Cada propuesta, revision, conflicto, aprobacion, rechazo, activacion, sustitucion, revocacion, reversio y vencimiento de plazo se registra mediante eventos canonicos en E - K-Evid",
+    "dashboard_note": "El dashboard solo presenta el estado registrado y no sustituye firmas ni eventos",
+    "open_conditions": ["Un cambio puede activarse sin compatibilidad constitucional, firma, evidencia, identidad o decision local de K-Core", "Un parche de emergencia puede saltarse esos controles", "El vencimiento produce aprobacion implicita", "Una transicion borra la historia normativa"]
+  },
+  "signed_corpus_double_signature_shadow": {
+    "corpus_definition": "El corpus normativo vive como paquete firmado y versionado, con hash estable, diff reconocido, texto de interpretacion aprobado y epoca de vigencia",
+    "diff_requirements": ["Algoritmo", "Formato", "Alcance de comparacion", "Version", "Firma del propio diff"],
+    "diff_constraint": "Un diff ausente, invalido o no verificable bloquea la activacion",
+    "double_signature": {
+      "requirement": "La activacion exige dos firmas de identidades distintas, independientes y no subordinadas entre si para el mismo cambio",
+      "roles": "Con al menos un rol juridico y uno tecnico cuando el contenido lo requiera",
+      "note": "Las firmas acreditan asuncion separada de responsabilidad; no convierten el contenido en verdadero ni sustituyen la comprobacion de compatibilidad de K-Core"
+    },
+    "shadow_evaluation": {
+      "purpose": "Antes de activar, el paquete se evalua en sombra contra el mismo conjunto de entradas y el snapshot de la version vigente",
+      "prohibited": ["Ejecutar efectos", "Emitir grants", "Crear capacidades", "Modificar estado soberano"],
+      "output": "Solo produce evidencia comparativa, divergencias, limites y resultado de compatibilidad"
+    },
+    "activation": {
+      "requirements": ["Epoca explicita", "Reloj definido", "Condicion de corte", "Snapshot", "Hash", "Firmas", "Decision local", "Evento de activacion"],
+      "preservation": "El corpus anterior permanece conservado para reconstruccion historica"
+    },
+    "revocation_effects": {
+      "no_rewrite": "La revocacion de un paquete no reescribe decisiones pasadas",
+      "actions": ["Invalida capacidades vivas segun la politica", "Propaga la revocacion a C-06 y C-09", "Registra los eventos en E - K-Evid"]
+    },
+    "reversion_rule": "La reversio reactiva una version anterior mediante el mismo ciclo de compatibilidad, doble firma, sombra, decision local y activacion por epoca; no existe una ruta abreviada"
+  },
+  "additional_closure_rule": {
+    "open_conditions": ["Un diff no es reproducible", "Las firmas no son independientes", "La sombra produce efectos", "La activacion no tiene epoca verificable", "La revocacion no se propaga", "La reversio evita los controles del cambio normal"]
+  },
+  "invalidation_rule": {
+    "triggers": ["Cambio en C-12", "Nuevo tipo de cambio o campo de expediente", "Cambio en flujo normal o emergencia", "Cambio en activacion, doble firma o sombra", "Cambio en revocacion o reversio", "Invalidacion Gate 0, Gate 1, Gate 2, Gate 3, Gate 4, Gate 5, Gate 6, Gate 7, Gate 8, Gate 9 o Gate 10"],
+    "cascade_policy": "Gates 12-13 dependen del Gate 11",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "normative_documentation_closure_hash": "476a2f08d64b3f9336ac0c2ef2e60c3902123adac7bccab6187d8d654d9f8c57"
+}
