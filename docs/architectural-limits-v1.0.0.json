@@ -1,0 +1,51 @@
+{
+  "architectural_limits_id": "AL-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T14:23:00Z",
+  "source_specs": ["A-06", "C-12", "C-21"],
+  "constitutional_limits": [
+    "K-Core conserva la autoridad soberana local",
+    "Ninguna capa, subsistema, interfaz, bus o adaptador puede crear autoridad paralela",
+    "Las capas de decision, verificacion, especificacion y persistencia permanecen separadas por diseño",
+    "Todo subsistema autoritativo queda subordinado a las invariantes y decisiones de K-Core",
+    "K-Net es opcional y no puede prevalecer sobre K-Core",
+    "K-Evid puede recibir, preservar y verificar evidencia, pero no emite identidad, politica, grants ni decisiones soberanas",
+    "Los Adaptadores transportan, presentan o ejecutan acciones mediadas, pero no adquieren autoridad",
+    "Los mappings regulatorios no modifican la autoridad constitucional ni convierten el runtime en interprete juridico"
+  ],
+  "kis_architecture": {
+    "description": "4 capas, 9 subsistemas, 15 contratos de interfaz, event bus y matriz de acceso",
+    "spec_location": "C - K-Spec",
+    "required_definitions": ["Capas y limites", "Subsistemas y responsabilidades", "Contratos de interfaz", "Tipos de entrada y salida", "Modos de fallo", "Dependencias con K-Core, K-Net, K-Evid y Adaptadores", "Parametros configurables y supuestos"]
+  },
+  "verification_objectives": {
+    "coverage": "Matriz completa requisito-mecanismo-evidencia",
+    "failure_isolation": "Fallos observables bajo supuestos explicitos de bus y persistencia",
+    "composition": "Prueba composicional; la seguridad individual de los componentes no basta",
+    "evidence_location": "E - K-Evid"
+  },
+  "event_bus_constraints": [
+    "Un bus unico no puede introducir una dependencia que destruya la autonomia local de K-Core",
+    "Debe definir comportamiento cuando K-Net, consenso, persistencia o el propio bus no esten disponibles",
+    "Orden causal, persistencia antes de entrega, firma y coste deben respaldarse con contratos y evidencia"
+  ],
+  "ai_act_mapping_principles": [
+    "El mapping tecnico no constituye por si mismo prueba de conformidad juridica",
+    "Debe separar: obligacion normativa, control tecnico, evidencia requerida, limitacion del runtime, responsabilidad del adaptador, estado de validacion"
+  ],
+  "exclusions": [
+    "Implementacion concreta de los subsistemas",
+    "Pruebas TLC o resultados formales",
+    "Benchmarks del event bus",
+    "Dossiers regulatorios completos",
+    "Interpretacion juridica",
+    "Transporte externo de exportaciones"
+  ],
+  "invalidation_rule": {
+    "triggers": ["Cambio en A-06, C-12 o C-21", "Nueva capa o subsistema que cree autoridad paralela", "Cambio en separacion de dominios", "Invalidacion Gate 0, Gate 1, Gate 2 o Gate 3"],
+    "cascade_policy": "Gates 5-13 dependen del Gate 4",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "architectural_limits_hash": "63ddb6d0e3132fec7bbfe780f56edff531781a073ff2aad2be40e57fa4f38ddf"
+}
