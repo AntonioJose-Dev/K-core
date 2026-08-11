@@ -1,0 +1,96 @@
+{
+  "final_closure_id": "FC-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T15:52:00Z",
+  "source_gates": ["Gate 4", "Gate 5", "Gate 6", "Gate 7", "Gate 8", "Gate 9", "Gate 10", "Gate 11", "Gate 12"],
+  "gate_artifacts": [
+    {"gate": 4, "artifact": "ArchitecturalLimitsV1", "file": "architectural-limits-v1.0.0.json", "hash": "63ddb6d0e3132fec7bbfe780f56edff531781a073ff2aad2be40e57fa4f38ddf", "status": "CERRADO"},
+    {"gate": 5, "artifact": "InvariantDecisionsV1", "file": "invariant-decisions-v1.0.0.json", "hash": "8a3ccccdb41f4f9e3fa7eeb1cb7c2896559517bc013c0e2eb87dddbad5806977", "status": "CERRADO"},
+    {"gate": 6, "artifact": "ArchitecturalExecutionLimitsV1", "file": "architectural-execution-limits-v1.0.0.json", "hash": "9222d1fafb2d4a318280c51fb4d2f7abbbc28a1c1870cfd3dd55683c36e5dc33", "status": "CERRADO"},
+    {"gate": 7, "artifact": "CoreAdapterSeparationV1", "file": "core-adapter-separation-v1.0.0.json", "hash": "af5ed76af3508baa3195b9791068b0cca502291711ec1f58067e941a0b28ebcb", "status": "CERRADO"},
+    {"gate": 8, "artifact": "OperationalClosureAuditV1", "file": "operational-closure-audit-v1.0.0.json", "hash": "13c1ba0cfbe053a0eaef0e922036373d193f8baa53a00fb9a564505fecb02dc7", "status": "CERRADO"},
+    {"gate": 9, "artifact": "HumanSupervisionRollbackV1", "file": "human-supervision-rollback-v1.0.0.json", "hash": "fed9236c093d8855baaab70c7362189d47dca0608ecad8bf295b71b4c2fa6d80", "status": "CERRADO"},
+    {"gate": 10, "artifact": "GrantLifecycleNormativeRevocationV1", "file": "grant-lifecycle-normative-revocation-v1.0.0.json", "hash": "2e252e4f0133d64f6af3ad492f9e975d0c048ca9d6e1472272b2ad88acb09826", "status": "CERRADO"},
+    {"gate": 11, "artifact": "NormativeDocumentationClosureV1", "file": "normative-documentation-closure-v1.0.0.json", "hash": "476a2f08d64b3f9336ac0c2ef2e60c3902123adac7bccab6187d8d654d9f8c57", "status": "CERRADO"},
+    {"gate": 12, "artifact": "SignedCorpusActivationV1", "file": "signed-corpus-activation-v1.0.0.json", "hash": "64d765b5638340bf281834e7feebef0f4230ca142aa5f84ec130e3a323c24cff", "status": "CERRADO"}
+  ],
+  "gates_0_to_3_status": {
+    "note": "Gates 0-3 son precondiciones constitucionales y de arquitectura ya cerradas antes de la serie 4-13",
+    "gate_0": {"name": "Mision, alcance y no-objetivos", "status": "CERRADO", "source": "A-00"},
+    "gate_1": {"name": "Soberanias fundamentales", "status": "CERRADO", "source": "A-01"},
+    "gate_2": {"name": "Modelo de amenazas constitucional", "status": "CERRADO", "source": "A-02"},
+    "gate_3": {"name": "Arquitectura de autoridad y flujos", "status": "CERRADO", "source": "A-03"}
+  },
+  "closure_verification": {
+    "all_gates_closed": true,
+    "total_gates": 13,
+    "gates_4_to_12_count": 9,
+    "all_artifacts_in_docs": true,
+    "all_hashes_registered": true,
+    "all_commits_in_github": true,
+    "github_repo": "AntonioJose-Dev/K-core",
+    "docs_path": "docs/"
+  },
+  "invalidation_rule": {
+    "triggers": [
+      "Cualquier gate 4-12 marcado como REABIERTO",
+      "Cualquier artefacto con hash diferente al registrado",
+      "Cambio en A-00, A-01, A-02, A-03, A-04, A-05, A-06, A-07",
+      "Cambio en B-05, B-06, B-07",
+      "Cambio en C-12",
+      "Nuevo requisito constitucional que afecte la arquitectura",
+      "Invalidacion de cualquier invariante A-04.x"
+    ],
+    "cascade_policy": "Si un gate se REABRE, todos los gates dependientes posteriores se marcan como REABIERTOS automaticamente",
+    "dependency_chain": [
+      "Gate 4 -> Gates 5-13",
+      "Gate 5 -> Gates 6-13",
+      "Gate 6 -> Gates 7-13",
+      "Gate 7 -> Gates 8-13",
+      "Gate 8 -> Gates 9-13",
+      "Gate 9 -> Gates 10-13",
+      "Gate 10 -> Gates 11-13",
+      "Gate 11 -> Gates 12-13",
+      "Gate 12 -> Gate 13"
+    ],
+    "revalidation_procedure": [
+      "1. Recalcular hash del artefacto afectado",
+      "2. Comparar con hash registrado",
+      "3. Si difiere: marcar OBSOLETO",
+      "4. Generar diff entre versiones",
+      "5. Identificar gates dependientes",
+      "6. Marcar dependientes como REABIERTOS",
+      "7. Generar nueva version del artefacto",
+      "8. Nueva epoca",
+      "9. Commit con referencia al cambio",
+      "10. Actualizar FinalClosureV1 con nuevos hashes"
+    ],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot del artefacto actualizado"
+  },
+  "reopen_criteria": {
+    "automatic_reopen_if": [
+      "Hash de artefacto diferente al registrado en FinalClosureV1",
+      "Archivo de artefacto eliminado de docs/",
+      "Commit de artefacto revertido en GitHub",
+      "Cambio en spec fuente (A-xx, B-xx, C-xx) sin actualizar artefacto",
+      "Nuevo invariante A-04.x que contradiga artefacto existente",
+      "Decision ADR nueva que afecte arquitectura de gates 4-12"
+    ],
+    "manual_reopen_if": [
+      "Auditoria externa identifica brecha de soberania",
+      "Incidente de seguridad que afecte separacion K-Core/Adaptadores",
+      "Cambio regulatorio (AI Act) que requiera nuevo control",
+      "Decision juridica que afecte interpretacion normativa"
+    ],
+    "reopen_process": [
+      "1. Identificar gate afectado",
+      "2. Marcar gate como REABIERTO en Notion",
+      "3. Identificar dependientes (gates posteriores)",
+      "4. Marcar dependientes como REABIERTOS",
+      "5. Actualizar FinalClosureV1 con estado REABIERTO",
+      "6. Ejecutar revalidation_procedure",
+      "7. Solo cerrar cuando prueba minima pase contra nuevo snapshot"
+    ]
+  },
+  "final_closure_hash": "d930820a64eb3160b7d935eeb1c9b39f21e00a814947e6ac8ecf0757be5e2b92"
+}
