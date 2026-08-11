@@ -1,0 +1,27 @@
+{
+  "invariant_decisions_id": "ID-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T14:27:00Z",
+  "source_specs": ["A-05"],
+  "decisions": [
+    {"adr_id": "ADR-01", "decision": "Division del sistema en Constitucion, K-Core, K-Spec, K-Net y K-Evid, con una autoridad constitucional unica", "primary_domain": "A - Constitucion", "status": "CERRADO", "implications": ["Autoridad superior fija en Constitucion", "K-Core ejerce autoridad soberana localmente", "Demas dominios no pueden crear autoridad por si mismos"]},
+    {"adr_id": "ADR-02", "decision": "K-Net esta desactivado por defecto y solo puede habilitarse mediante politica explicita y condiciones verificadas", "primary_domain": "A - Constitucion / D - K-Net", "status": "CERRADO", "implications": ["K-Net no puede prevalecer sobre K-Core", "Activacion requiere politica explicita, perfil de federacion valido, verificacion de condiciones de seguridad", "Violacion produce desactivacion y estado seguro"]},
+    {"adr_id": "ADR-03", "decision": "K-Evid es transversal y no constituye una autoridad soberana independiente", "primary_domain": "A - Constitucion / E - K-Evid", "status": "CERRADO", "implications": ["K-Evid recibe, preserva, verifica y expone evidencia de todos los dominios", "No puede emitir identidad, evaluar politica soberana, emitir grants, modificar estado soberano, autorizar ejecucion"]},
+    {"adr_id": "ADR-04", "decision": "GrantV1 v1 es la unidad atomica de ejecucion soberana, de un solo uso, limitada, auditable y no transferible", "primary_domain": "B - K-Core", "status": "CERRADO - RE-010", "properties": ["max_uses = 1", "Scope limitado", "Vigencia explicita", "Expiracion", "Revocacion", "No transferencia", "No ampliacion", "Estado auditable", "Consumo durable", "Reconciliacion posterior cuando corresponda"], "implications": ["RECONCILIATION_REQUIRED no es estado adicional, es condicion que conduce a RECOVERY", "Si reconciliacion falla, destino es FAIL_STATIC"]},
+    {"adr_id": "ADR-05", "decision": "K-Core es la unica autoridad soberana; los adaptadores son no soberanos y toda salida hacia ellos esta mediada", "primary_domain": "A - Constitucion / B - K-Core / F - Adaptadores", "status": "CERRADO", "implications": ["Adaptadores no poseen autoridad propia, no emiten grants, no modifican politica, no modifican estado soberano, no transfieren capacidades", "Solo ejecutan acciones mediadas y limitadas", "Toda salida que produzca efecto protegido debe estar contenida en SealedOutput valido"]}
+  ],
+  "registration_rule": {
+    "requirements": ["ID estable", "Dominio primario", "Alcance explicito", "Ausencia de contradiccion", "Implementacion asignada", "Evidencia requerida", "Declaracion de decisiones que sustituye o modifica"]
+  },
+  "change_registry": {
+    "requirements": ["Autor", "Revisor", "Competencia", "Alcance", "Nivel", "Clase de efecto", "Precedencia", "Ambiguedades", "Evidencia de aprobacion", "Version anterior y nueva", "Hashes", "Firmas", "Diff reconocido", "Resultado de conformidad", "Condicion de activacion", "Epoca efectiva"],
+    "constraints": ["Revocaciones y reversiones se registran como decisiones nuevas", "No reescriben decisiones pasadas", "Ningun cambio de gobierno puede activarse por ruta operativa, aprobacion generica o accion de sistema de IA"]
+  },
+  "invalidation_rule": {
+    "triggers": ["Cambio en A-05", "Nueva decision ADR que afecte autoridad, soberania, separacion, limites o estructura global", "Invalidacion Gate 0, Gate 1, Gate 2, Gate 3 o Gate 4"],
+    "cascade_policy": "Gates 6-13 dependen del Gate 5",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "invariant_decisions_hash": "8a3ccccdb41f4f9e3fa7eeb1cb7c2896559517bc013c0e2eb87dddbad5806977"
+}
