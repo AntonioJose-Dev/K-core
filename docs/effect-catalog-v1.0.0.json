@@ -1,0 +1,27 @@
+{
+  "effect_catalog_id": "EC-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T13:55:00Z",
+  "source_spec": "C-01",
+  "effect_classes": [
+    {"effect_id": "EF-1", "name": "Inferencia", "application_point": "Policy Engine", "authority_required": "SOV-2", "bypass_risk": "Medio", "minimum_grant": "grant inferencia", "evidence_required": "hash input, hash modelo, timestamp", "default_state": "DENY"},
+    {"effect_id": "EF-2", "name": "Acceso lectura datos", "application_point": "Data Access Layer", "authority_required": "SOV-1 + SOV-4", "bypass_risk": "Alto", "minimum_grant": "grant lectura", "evidence_required": "identidad, recurso, hash datos", "default_state": "DENY"},
+    {"effect_id": "EF-3", "name": "Escritura modificacion datos", "application_point": "Data Access Layer", "authority_required": "SOV-1 + SOV-4", "bypass_risk": "Critico", "minimum_grant": "grant escritura", "evidence_required": "hash anterior, hash nuevo, identidad", "default_state": "DENY"},
+    {"effect_id": "EF-4", "name": "Uso herramientas efectores", "application_point": "Tool Executor", "authority_required": "SOV-4", "bypass_risk": "Alto", "minimum_grant": "grant herramienta", "evidence_required": "nombre herramienta, params hash", "default_state": "DENY"},
+    {"effect_id": "EF-5", "name": "Operaciones negocio", "application_point": "Business Logic Layer", "authority_required": "SOV-2 + SOV-4", "bypass_risk": "Medio", "minimum_grant": "grant operacion", "evidence_required": "ID operacion, params hash", "default_state": "DENY"},
+    {"effect_id": "EF-6", "name": "Comunicaciones", "application_point": "Communication Adapter", "authority_required": "SOV-4", "bypass_risk": "Alto", "minimum_grant": "grant comunicacion", "evidence_required": "destinatario, contenido hash", "default_state": "DENY"},
+    {"effect_id": "EF-7", "name": "Publicacion exposicion", "application_point": "Publication Adapter", "authority_required": "SOV-4", "bypass_risk": "Critico", "minimum_grant": "grant publicacion", "evidence_required": "contenido hash, audiencia", "default_state": "DENY"},
+    {"effect_id": "EF-8", "name": "Decision consecuencia personas", "application_point": "Decision Point", "authority_required": "SOV-2 + C-14", "bypass_risk": "Critico", "minimum_grant": "grant decision", "evidence_required": "expediente, identidad revisor", "default_state": "DENY"},
+    {"effect_id": "EF-9", "name": "Ejecucion codigo", "application_point": "Sandbox", "authority_required": "SOV-4 + A-04.9", "bypass_risk": "Critico", "minimum_grant": "grant ejecucion", "evidence_required": "hash codigo, attestation", "default_state": "DENY"},
+    {"effect_id": "EF-10", "name": "Movimiento transferencia datos", "application_point": "Data Transfer Layer", "authority_required": "SOV-4 + C-17", "bypass_risk": "Alto", "minimum_grant": "grant transferencia", "evidence_required": "hash, origen, destino", "default_state": "DENY"},
+    {"effect_id": "EF-11", "name": "Efecto fisico", "application_point": "Physical Actuator", "authority_required": "SOV-4 + A-02", "bypass_risk": "Critico", "minimum_grant": "grant actuacion", "evidence_required": "identidad actuador, comando hash", "default_state": "DENY"},
+    {"effect_id": "EF-12", "name": "Cambio gobierno", "application_point": "PROHIBIDO", "authority_required": "IRREVOCABLEMENTE DENEGADO", "bypass_risk": "PROHIBIDO", "minimum_grant": "NINGUNO", "evidence_required": "intento registrado incidente", "default_state": "DENY"}
+  ],
+  "invalidation_rule": {
+    "triggers": ["Cambio en C-01", "Adicion nueva clase EF", "Cambio en bypass_risk", "Invalidacion Gate 0"],
+    "cascade_policy": "Gates 2-13 dependen del Gate 1",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "effect_catalog_hash": "517a2b98043ca74a9bd89996f43e98f63a02c43de8a5ede4cec75470ddcd8df8"
+}
