@@ -1,0 +1,24 @@
+{
+  "canonical_contracts_id": "CC-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T14:08:00Z",
+  "source_specs": ["B-03", "B-07", "B-08", "B-09", "C-06"],
+  "contract_schemas": [
+    {"schema_id": "EventV1", "source": "B-03", "description": "Evento soberano con 15 campos canonicos, CBOR determinista, HMAC-SHA-256 para event_id, SHA-256 para event_hash, Ed25519 para firma", "critical_fields": "1-15 (criticas obligatorias), 16-999 (reservadas criticas), 1000-65535 (extension no critica)", "crypto_profile": "SHA-256, HMAC-SHA-256, AES-256-GCM, AES-KW-256, Ed25519, DRBG-CTR", "hash": "pending"},
+    {"schema_id": "RequestV1", "source": "B-09", "description": "Solicitud de adaptador a K-Core", "fields": {"1": "version (uint)", "2": "grant_id (bytes[32])", "3": "action (text)", "4": "payload (bytes)", "5": "nonce_local (uint)", "6": "signature (bytes)"}, "hash": "pending"},
+    {"schema_id": "ResponseV1", "source": "B-09", "description": "Respuesta de K-Core a adaptador", "fields": {"1": "version (uint)", "2": "status_code (uint)", "3": "result (bytes)", "4": "nonce_local (uint)", "5": "receipt (bytes - ReceiptV1 serializado)"}, "hash": "pending"},
+    {"schema_id": "ReceiptV1", "source": "B-08", "description": "Recibo de ejecucion con evidencia", "fields": "grant_id, action, result_hash, timestamp, event_id, signature", "hash": "pending"},
+    {"schema_id": "GrantV1", "source": "B-07", "description": "Capacidad atomica de ejecucion soberana", "properties": ["max_uses = 1", "scope limitado", "vigencia explicita", "expiracion", "revocacion", "no transferencia", "no ampliacion", "estado auditable", "consumo durable"], "hash": "pending"},
+    {"schema_id": "RevocationV1", "source": "B-07", "description": "Revocacion de grant", "properties": ["grant_id", "reason", "timestamp", "signature", "epoch"], "hash": "pending"},
+    {"schema_id": "SealedOutput", "source": "B-08", "description": "Output sellado criptograficamente", "properties": ["grant_id", "action", "result_hash", "signature", "timestamp"], "hash": "pending"},
+    {"schema_id": "CapabilityV1", "source": "C-06", "description": "Capabilidad emitida y verificada", "properties": ["capability_id", "subject", "scope", "conditions", "expiration", "signature"], "hash": "pending"}
+  ],
+  "error_codes": {"0": "OK", "1": "INVALID_GRANT", "2": "POLICY_DENIED", "3": "INVALID_REQUEST", "4": "BUFFER_TOO_SMALL", "5": "INTERNAL_ERROR", "6": "NOT_AUTHORIZED"},
+  "invalidation_rule": {
+    "triggers": ["Cambio en B-03, B-07, B-08, B-09 o C-06", "Nuevo campo critico en esquema existente", "Cambio en perfil criptografico", "Invalidacion Gate 0, Gate 1 o Gate 2"],
+    "cascade_policy": "Gates 4-13 dependen del Gate 3",
+    "revalidation_procedure": ["Recalcular hash de esquema afectado", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "canonical_contracts_hash": "5f200d948b966a95194bcf718483a1ef36c9fa9ee8a0bb209fa122b5ac2ef31a"
+}
