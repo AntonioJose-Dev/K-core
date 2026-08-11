@@ -1,0 +1,51 @@
+{
+  "core_adapter_separation_id": "CAS-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T15:27:00Z",
+  "source_specs": ["A-07"],
+  "fundamental_rule": "K-Core es la unica autoridad que puede decidir, evaluar politica efectiva, emitir o revocar grants, modificar el estado soberano, registrar autoritativamente y ordenar una parada soberana. Los adaptadores solo pueden solicitar, transportar, presentar o ejecutar acciones previamente autorizadas",
+  "adapter_definition": {
+    "definition": "Cualquier componente que interactua con K-Core para solicitar, ejecutar, transportar o presentar el resultado de una accion soberana sin poseer autoridad normativa propia",
+    "classification": "Exhaustiva por comportamiento",
+    "examples": ["Runtimes y SDKs", "Servicios HTTP", "Modelos de IA", "Frameworks de agentes", "Orquestadores", "Integraciones externas", "UI y dashboards", "Auditores y sistemas externos"],
+    "note": "La tecnologia, complejidad o capacidad del adaptador no le confiere autoridad adicional"
+  },
+  "prohibitions": ["Evaluar una politica soberana", "Determinar autoritativamente allow, deny o revision", "Determinar por si mismo el cumplimiento normativo", "Emitir, modificar, revocar, clonar, transferir o reutilizar grants", "Crear o activar una PolicyPackage", "Modificar el registro autoritativo", "Firmar como K-Core", "Modificar el estado soberano", "Salir de SAFE_STOP, RECOVERY o FAIL_STATIC", "Ejecutar un efecto protegido sin autorizacion vigente", "Crear una ruta alternativa de autoridad"],
+  "prohibitions_note": "Las validaciones auxiliares de formato, sintaxis o conectividad no son decisiones autoritativas y no sustituyen a K-Core",
+  "channels": {
+    "operational_channel": {
+      "description": "Toda solicitud o ejecucion operativa entre adaptador y K-Core debe utilizar el contrato operativo versionado de B - K-Core y F - Adaptadores",
+      "constraint": "No existe una ruta operativa alternativa, experimental, de debug o de urgencia que permita saltarse la mediacion"
+    },
+    "audit_channel": {
+      "description": "La auditoria externa es de solo lectura. Permite consultar y verificar evidencia",
+      "prohibited": ["Emitir grants", "Modificar politica", "Cambiar estado", "Ejecutar acciones", "Revertir una decision de K-Core"],
+      "contracts_location": "E - K-Evid"
+    }
+  },
+  "sealed_output": {
+    "rule": "Todo output que pueda producir, representar o activar un efecto protegido debe estar contenido en un SealedOutput valido emitido por K-Core",
+    "adapter_must_verify": ["Firma", "Grant asociado", "Scope", "Contexto", "Vigencia", "Estado", "Integridad del output"],
+    "note": "Un output no sellado puede ser informativo, pero nunca puede producir un efecto soberano",
+    "crypto_profile_location": "B - K-Core o C - K-Spec"
+  },
+  "bypass_unviability": {
+    "steps_on_unauthorized_action": ["Denegar", "Emitir un codigo de error explicito", "Registrar el intento cuando sea relevante para la soberania", "Mantener el estado seguro correspondiente", "No conceder excepciones por urgencia, falta de red, falta de politica o SAFE_STOP"],
+    "note": "La revision controlada no autoriza por si misma una accion ni permite saltar la maquina de estados de B-05"
+  },
+  "protected_effect_conditions": ["K-Core emite un grant valido", "El grant esta vigente, limitado y no consumido", "El adaptador usa el grant dentro de su scope", "Las condiciones de identidad, politica, integridad y estado siguen siendo validas", "K-Core produce o valida el SealedOutput correspondiente", "La decision y el resultado quedan registrados"],
+  "protected_effect_note": "Ninguna condicion puede ser sustituida por confianza en el adaptador",
+  "adapter_conformance": {
+    "requirements": ["Una version concreta de A-07", "Una version concreta del contrato operativo", "Un perfil criptografico definido", "Un threat model aplicable", "Un conjunto de tests contractuales", "Evidencia reproducible de los resultados"],
+    "note": "Los adaptadores oficiales pueden tener un estado de conformidad registrado. Los adaptadores de terceros no se consideran conformes por defecto",
+    "limitation": "Los tests contractuales son requisitos minimos de verificacion. No constituyen por si solos una garantia completa de conformidad"
+  },
+  "closure_rule": "Si un adaptador puede producir un efecto protegido, modificar politica, alterar estado, emitir autoridad, evitar evidencia o continuar tras perder integridad sin una decision local de K-Core, la separacion constitucional esta rota",
+  "invalidation_rule": {
+    "triggers": ["Cambio en A-07", "Nueva prohibicion o excepcion sobre adaptadores", "Cambio en definicion de adaptador o canales", "Invalidacion Gate 0, Gate 1, Gate 2, Gate 3, Gate 4, Gate 5 o Gate 6"],
+    "cascade_policy": "Gates 8-13 dependen del Gate 7",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "core_adapter_separation_hash": "af5ed76af3508baa3195b9791068b0cca502291711ec1f58067e941a0b28ebcb"
+}
