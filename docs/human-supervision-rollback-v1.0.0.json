@@ -1,0 +1,86 @@
+{
+  "human_supervision_rollback_id": "HSR-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T15:35:00Z",
+  "source_specs": ["B-05", "B-07"],
+  "human_escalation": {
+    "requirements": ["Plazo explicito", "Condicion de quorum", "Alcance definido"],
+    "on_timeout_or_incomplete": "Ante plazo vencido, quorum incompleto, identidad no verificable, competencia insuficiente, falta de independencia o resolucion desvinculada del contexto, K-Core debe rechazar la resolucion y ejecutar la transicion normativa aplicable",
+    "no_silent_continuation": "No se permite continuar como si la supervision hubiera sido satisfecha",
+    "transition_must_record": ["Causa", "Expediente conservado"],
+    "possible_states": ["MAINTENANCE", "SAFE_STOP", "FAIL_STATIC"],
+    "valid_closure": ["Decision", "Estado final", "Identidades", "Quorum", "Plazo", "Evidencia asociada"]
+  },
+  "assumption_monitor": {
+    "purpose": "Observa las condiciones criticas que sostienen la soberania. No evalua politica, no emite grants y no crea autoridad; solo clasifica hechos y fuerza la transicion segura",
+    "critical_assumptions_requirements": ["Identificador estable", "Estado explicito", "Umbral o criterio verificable", "Vigencia o condicion de caducidad", "Evidencia asociada", "Estado seguro de destino ante perdida"],
+    "continuous_monitoring": "Los supuestos se vigilan durante toda la operacion, no solo durante BOOTSTRAP o ATTESTING",
+    "on_assumption_loss": "Si un supuesto necesario para una clase de efecto deja de cumplirse, esa clase pierde autorizacion inmediatamente",
+    "forced_transitions": {
+      "limited_loss": "Perdida limitada de garantia o postura no apta para Produccion → MAINTENANCE",
+      "critical_loss": "Perdida critica de integridad, durabilidad o evidencia → SAFE_STOP",
+      "irrecoverable": "Contradiccion irrecuperable o imposibilidad de reconciliacion → FAIL_STATIC"
+    },
+    "no_degraded_states": "No se introducen DEGRADED ni SUSPENDED; esos estados no forman parte de la maquina cerrada de B-05",
+    "fact_expiration": "Al caducar, el hecho se evalua como falso o no demostrado hasta renovacion verificable. Un hecho antiguo no puede seguir sosteniendo autoridad solo porque fue valido en el pasado",
+    "alerts_and_response": "Cuando el monitor detecta una perdida que afecta a la soberania, genera una alerta, bloquea la expansion de autoridad y ejecuta la transicion segura correspondiente. No existe continuidad silenciosa ni reparacion automatica que mantenga autorizacion mientras el supuesto siga perdido"
+  },
+  "rollback_rules": [
+    "Rollback es la vuelta controlada a un estado anterior conocido como bueno",
+    "No borra eventos, grants, decisiones ni evidencia ya emitida",
+    "Debe identificar el estado objetivo y su raiz de evidencia",
+    "Debe verificar que el estado objetivo es integro y compatible con la politica activa",
+    "Debe registrar quien o que autorizo la operacion y bajo que identidad",
+    "Debe conservar la trazabilidad completa entre el estado abandonado y el estado restaurado",
+    "Debe impedir la reutilizacion de grants, nonces o estados consumidos cuando el rollback pueda producir replay",
+    "Debe repetir las verificaciones de identidad, plataforma, evidencia, postura e invariantes antes de volver a PRODUCTION",
+    "Rollback no es una recuperacion automatica ni una forma de reescribir la historia",
+    "Si la evidencia del estado objetivo no puede verificarse, el Kernel permanece en RECOVERY, SAFE_STOP o FAIL_STATIC segun la severidad"
+  ],
+  "grant_lifecycle": {
+    "states": ["ISSUED", "IN_FLIGHT", "CONSUMED", "ABORTED", "REVOKED", "EXPIRED", "RECONCILIATION_REQUIRED"],
+    "transitions": [
+      "ISSUED → IN_FLIGHT → CONSUMED",
+      "IN_FLIGHT → ABORTED",
+      "ISSUED → REVOKED",
+      "IN_FLIGHT → REVOKED",
+      "ISSUED → EXPIRED",
+      "IN_FLIGHT → EXPIRED (cuando el contrato de ejecucion lo permita y el epoch haya salido del rango)",
+      "ISSUED o IN_FLIGHT → RECONCILIATION_REQUIRED (cuando el uso no pueda reconciliarse de forma segura)"
+    ],
+    "terminal_states": ["CONSUMED", "ABORTED", "REVOKED", "EXPIRED", "RECONCILIATION_REQUIRED"],
+    "consumed_note": "Un grant CONSUMED no se revoca retroactivamente; un incidente posterior se registra como evento separado"
+  },
+  "revocation_rules": [
+    "Solo K-Core puede emitir RevocationV1",
+    "FEDERATED_REVOCATION puede describir el origen de una señal recibida desde K-Net, pero no concede a K-Net capacidad de revocacion directa",
+    "Un adaptador no puede ignorar una revocacion efectiva",
+    "La revocacion se registra en el ledger como evento soberano"
+  ],
+  "revocation_reason_codes": {
+    "0x0001": "UNSPECIFIED",
+    "0x0002": "POLICY_VIOLATION",
+    "0x0003": "EXPIRED",
+    "0x0004": "COMPROMISE",
+    "0x0005": "OPERATOR_REQUEST",
+    "0x0006": "FEDERATED_REVOCATION (como motivo de señal, no como autoridad externa)"
+  },
+  "normative_revocation": {
+    "on_policy_revocation": "Cuando una version normativa activa es revocada, las capacidades vivas emitidas bajo ese paquete deben identificarse, invalidarse o reconciliarse conforme a la politica vigente",
+    "no_rewrite": "La revocacion no reescribe las decisiones historicas ni elimina el hash normativo que las gobernaba",
+    "on_reversion": "Una reversio a una version anterior no reactiva automaticamente grants antiguos. Las capacidades deben emitirse o reconciliarse mediante el proceso completo vigente, con identidad, politica, estado, expiracion y evidencia verificables"
+  },
+  "integrity_breach": {
+    "incident_types": ["Reescritura", "Hueco de secuencia", "Divergencia entre emision y almacenamiento", "Redaccion no autorizada", "Perdida o exposicion de una clave critica"],
+    "response": ["Bloquear expansion de autoridad", "Registrar el incidente", "Aplicar la transicion definida por la politica vigente"],
+    "possible_states": ["MAINTENANCE", "SAFE_STOP", "FAIL_STATIC"],
+    "recovery_requirement": "Exige una nueva condicion verificable de integridad, custodia y continuidad. Mientras no exista, el sistema no puede afirmar evidencia integra, custodia valida ni resistencia frente al operador"
+  },
+  "invalidation_rule": {
+    "triggers": ["Cambio en B-05 o B-07", "Nuevo estado de grant o transicion", "Cambio en monitor de supuestos o escalado humano", "Cambio en reglas de rollback o revocacion", "Invalidacion Gate 0, Gate 1, Gate 2, Gate 3, Gate 4, Gate 5, Gate 6, Gate 7 o Gate 8"],
+    "cascade_policy": "Gates 10-13 dependen del Gate 9",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "human_supervision_rollback_hash": "fed9236c093d8855baaab70c7362189d47dca0608ecad8bf295b71b4c2fa6d80"
+}
