@@ -1,0 +1,107 @@
+{
+  "operational_closure_audit_id": "OCA-001",
+  "version": "1.0.0",
+  "created_at": "2026-08-11T15:31:00Z",
+  "source_specs": ["B-05"],
+  "states": [
+    {"id": "BOOTSTRAP", "description": "Arranque inicial sin componentes validados"},
+    {"id": "ATTESTING", "description": "Verificacion de plataforma, identidad y postura"},
+    {"id": "PRODUCTION", "description": "Operacion soberana completa bajo politica y grants validos"},
+    {"id": "MAINTENANCE", "description": "Operacion limitada sin efectos de produccion completos"},
+    {"id": "SAFE_STOP", "description": "Parada segura con evidencia preservada y sin nuevas acciones soberanas"},
+    {"id": "RECOVERY", "description": "Reconciliacion de evidencia, raices, journal y estado tras reboot o parada"},
+    {"id": "FAIL_STATIC", "description": "Contradiccion o perdida de integridad irrecuperable; solo un reset de plataforma autorizado puede iniciar un nuevo ciclo"}
+  ],
+  "transitions": [
+    {"from": "BOOTSTRAP", "to": "ATTESTING", "condition": "Arranque local valido e inicio de verificacion"},
+    {"from": "ATTESTING", "to": "PRODUCTION", "condition": "Identidad, atestacion, postura e invariantes validos"},
+    {"from": "ATTESTING", "to": "MAINTENANCE", "condition": "Plataforma autentica e integra, pero postura no apta para produccion bajo politica explicita"},
+    {"from": "ATTESTING", "to": "FAIL_STATIC", "condition": "Fallo de integridad critica o contradiccion no recuperable"},
+    {"from": "PRODUCTION", "to": "SAFE_STOP", "condition": "Error de durabilidad, fallo de flush o incidente critico"},
+    {"from": "PRODUCTION", "to": "MAINTENANCE", "condition": "Grant de mantenimiento valido, operador autorizado y politica compatible"},
+    {"from": "MAINTENANCE", "to": "ATTESTING", "condition": "Mantenimiento completado y solicitud de nueva validacion"},
+    {"from": "MAINTENANCE", "to": "SAFE_STOP", "condition": "Perdida de integridad o incidente que exige parada segura"},
+    {"from": "MAINTENANCE", "to": "FAIL_STATIC", "condition": "Contradiccion irrecuperable"},
+    {"from": "SAFE_STOP", "to": "RECOVERY", "condition": "Reboot valido e inicio de reconciliacion"},
+    {"from": "RECOVERY", "to": "ATTESTING", "condition": "Journal, ledger, raices y estado critico concuerdan"},
+    {"from": "RECOVERY", "to": "FAIL_STATIC", "condition": "Corrupcion irrecuperable, slots invalidos, evidencia contradictoria o limite de intentos alcanzado"},
+    {"from": "FAIL_STATIC", "to": "BOOTSTRAP", "condition": "Solo mediante reset de plataforma autorizado y verificable"}
+  ],
+  "state_restrictions": {
+    "BOOTSTRAP": "No permite acciones soberanas",
+    "ATTESTING": "Solo permite operaciones de verificacion",
+    "PRODUCTION": "Permite acciones autorizadas por politica y grant",
+    "MAINTENANCE": "No permite efectos de produccion completos",
+    "SAFE_STOP": "No permite nuevas acciones soberanas; solo preservacion y recuperacion controlada",
+    "RECOVERY": "Solo permite reconciliacion y validacion",
+    "FAIL_STATIC": "No permite operacion soberana"
+  },
+  "recovery_rule": {
+    "max_attempts": "Parametro explicito, persistente, protegido y respaldado por evidencia",
+    "constraint": "No puede reiniciarse mediante un reboot ordinario",
+    "on_max_reached": "K-Core entra en FAIL_STATIC"
+  },
+  "platform_reset": {
+    "requirement": "Salida de FAIL_STATIC requiere reset de plataforma verificable",
+    "new_cycle": "Debe comenzar en BOOTSTRAP y repetir todas las verificaciones de identidad, plataforma, evidencia, postura e invariantes"
+  },
+  "rollback_rules": [
+    "Rollback es la vuelta controlada a un estado anterior conocido como bueno",
+    "No borra eventos, grants, decisiones ni evidencia ya emitida",
+    "Debe identificar el estado objetivo y su raiz de evidencia",
+    "Debe verificar que el estado objetivo es integro y compatible con la politica activa",
+    "Debe registrar quien o que autorizo la operacion y bajo que identidad",
+    "Debe conservar la trazabilidad completa entre el estado abandonado y el estado restaurado",
+    "Debe impedir la reutilizacion de grants, nonces o estados consumidos cuando el rollback pueda producir replay",
+    "Debe repetir las verificaciones de identidad, plataforma, evidencia, postura e invariantes antes de volver a PRODUCTION",
+    "Rollback no es una recuperacion automatica ni una forma de reescribir la historia",
+    "Si la evidencia del estado objetivo no puede verificarse, el Kernel permanece en RECOVERY, SAFE_STOP o FAIL_STATIC segun la severidad"
+  ],
+  "assumption_monitor": {
+    "purpose": "Observa las condiciones criticas que sostienen la soberania. No evalua politica, no emite grants y no crea autoridad; solo clasifica hechos y fuerza la transicion segura",
+    "critical_assumptions_requirements": ["Identificador estable", "Estado explicito", "Umbral o criterio verificable", "Vigencia o condicion de caducidad", "Evidencia asociada", "Estado seguro de destino ante perdida"],
+    "continuous_monitoring": "Los supuestos se vigilan durante toda la operacion, no solo durante BOOTSTRAP o ATTESTING",
+    "on_assumption_loss": "Si un supuesto necesario para una clase de efecto deja de cumplirse, esa clase pierde autorizacion inmediatamente",
+    "forced_transitions": {
+      "limited_loss": "Perdida limitada de garantia o postura no apta para Produccion → MAINTENANCE",
+      "critical_loss": "Perdida critica de integridad, durabilidad o evidencia → SAFE_STOP",
+      "irrecoverable": "Contradiccion irrecuperable o imposibilidad de reconciliacion → FAIL_STATIC"
+    },
+    "no_degraded_states": "No se introducen DEGRADED ni SUSPENDED; esos estados no forman parte de la maquina cerrada de B-05",
+    "fact_expiration": "Al caducar, el hecho se evalua como falso o no demostrado hasta renovacion verificable. Un hecho antiguo no puede seguir sosteniendo autoridad solo porque fue valido en el pasado",
+    "alerts_and_response": "Cuando el monitor detecta una perdida que afecta a la soberania, genera una alerta, bloquea la expansion de autoridad y ejecuta la transicion segura correspondiente. No existe continuidad silenciosa ni reparacion automatica que mantenga autorizacion mientras el supuesto siga perdido"
+  },
+  "human_escalation": {
+    "requirements": ["Plazo explicito", "Condicion de quorum", "Alcance definido"],
+    "on_timeout_or_incomplete": "Ante plazo vencido, quorum incompleto, identidad no verificable, competencia insuficiente, falta de independencia o resolucion desvinculada del contexto, K-Core debe rechazar la resolucion y ejecutar la transicion normativa aplicable",
+    "no_silent_continuation": "No se permite continuar como si la supervision hubiera sido satisfecha",
+    "transition_must_record": ["Causa", "Expediente conservado"],
+    "possible_states": ["MAINTENANCE", "SAFE_STOP", "FAIL_STATIC"],
+    "valid_closure": ["Decision", "Estado final", "Identidades", "Quorum", "Plazo", "Evidencia asociada"]
+  },
+  "integrity_breach": {
+    "incident_types": ["Reescritura", "Hueco de secuencia", "Divergencia entre emision y almacenamiento", "Redaccion no autorizada", "Perdida o exposicion de una clave critica"],
+    "response": ["Bloquear expansion de autoridad", "Registrar el incidente", "Aplicar la transicion definida por la politica vigente"],
+    "possible_states": ["MAINTENANCE", "SAFE_STOP", "FAIL_STATIC"],
+    "recovery_requirement": "Exige una nueva condicion verificable de integridad, custodia y continuidad. Mientras no exista, el sistema no puede afirmar evidencia integra, custodia valida ni resistencia frente al operador"
+  },
+  "normative_version_activation": {
+    "activation_delay": "Un paquete normativo aprobado no se aplica de inmediato: debe respetar el limite de epoca y las condiciones de estado definidas por la politica vigente",
+    "shadow_evaluation": "La evaluacion en sombra, cuando este exigida, registra las decisiones hipoteticas sin producir efectos ni grants",
+    "activation_requirements": ["Superar revision", "Diff", "Conformidad", "Firmas", "Condiciones de estado aplicables"],
+    "version_preservation": "La version anterior se conserva con su hash y relaciones historicas",
+    "reversion_rule": "Una reversio es una nueva activacion sometida al mismo proceso completo. No borra decisiones pasadas ni reescribe el hash normativo citado por ellas"
+  },
+  "error_codes": {
+    "SOV-1503": "Codigo canonico referenciado por la maquina de estados",
+    "SOV-1504": "Codigo canonico referenciado por la maquina de estados",
+    "note": "Sus significados normativos pertenecen al bloque canonico de codigos SOV; B-05 no los redefine"
+  },
+  "invalidation_rule": {
+    "triggers": ["Cambio en B-05", "Nuevo estado o transicion", "Cambio en restricciones por estado", "Cambio en monitor de supuestos o escalado humano", "Invalidacion Gate 0, Gate 1, Gate 2, Gate 3, Gate 4, Gate 5, Gate 6 o Gate 7"],
+    "cascade_policy": "Gates 9-13 dependen del Gate 8",
+    "revalidation_procedure": ["Recalcular hash", "Comparar", "Marcar OBSOLETO si difiere", "Generar diff", "Identificar dependientes", "Marcar REABIERTO", "Nueva version", "Nueva epoca", "Commit con referencia"],
+    "reopen_rule": "Ningun gate REABIERTO puede cerrar sin repetir prueba minima contra nuevo snapshot"
+  },
+  "operational_closure_audit_hash": "13c1ba0cfbe053a0eaef0e922036373d193f8baa53a00fb9a564505fecb02dc7"
+}
